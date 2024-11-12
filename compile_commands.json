@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/Users/syktox/Documents/Projekte/TODO_List/build",
+  "command": "/usr/bin/clang++  -I/Users/syktox/Documents/Projekte/TODO_List/lib -g -std=gnu++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk -o CMakeFiles/Todo_List.dir/src/main.cpp.o -c /Users/syktox/Documents/Projekte/TODO_List/src/main.cpp",
+  "file": "/Users/syktox/Documents/Projekte/TODO_List/src/main.cpp",
+  "output": "CMakeFiles/Todo_List.dir/src/main.cpp.o"
+},
+{
+  "directory": "/Users/syktox/Documents/Projekte/TODO_List/build/lib",
+  "command": "/usr/bin/clang++  -I/Users/syktox/Documents/Projekte/TODO_List/lib -g -std=gnu++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk -o CMakeFiles/mylib.dir/mylib.cpp.o -c /Users/syktox/Documents/Projekte/TODO_List/lib/mylib.cpp",
+  "file": "/Users/syktox/Documents/Projekte/TODO_List/lib/mylib.cpp",
+  "output": "lib/CMakeFiles/mylib.dir/mylib.cpp.o"
+},
+{
+  "directory": "/Users/syktox/Documents/Projekte/TODO_List/build/lib",
+  "command": "/usr/bin/clang++  -I/Users/syktox/Documents/Projekte/TODO_List/lib -g -std=gnu++2b -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.1.sdk -o CMakeFiles/Task.dir/Task.cpp.o -c /Users/syktox/Documents/Projekte/TODO_List/lib/Task.cpp",
+  "file": "/Users/syktox/Documents/Projekte/TODO_List/lib/Task.cpp",
+  "output": "lib/CMakeFiles/Task.dir/Task.cpp.o"
+}
+]

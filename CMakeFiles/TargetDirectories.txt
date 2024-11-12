@@ -1,0 +1,7 @@
+/Users/syktox/Documents/Projekte/TODO_List/build/CMakeFiles/Todo_List.dir
+/Users/syktox/Documents/Projekte/TODO_List/build/CMakeFiles/edit_cache.dir
+/Users/syktox/Documents/Projekte/TODO_List/build/CMakeFiles/rebuild_cache.dir
+/Users/syktox/Documents/Projekte/TODO_List/build/lib/CMakeFiles/mylib.dir
+/Users/syktox/Documents/Projekte/TODO_List/build/lib/CMakeFiles/Task.dir
+/Users/syktox/Documents/Projekte/TODO_List/build/lib/CMakeFiles/edit_cache.dir
+/Users/syktox/Documents/Projekte/TODO_List/build/lib/CMakeFiles/rebuild_cache.dir
