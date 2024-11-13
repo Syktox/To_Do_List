@@ -10,3 +10,4 @@ add_subdirectory(lib)
 
 target_link_libraries(${PROJECT_NAME} mylib)
 target_link_libraries(${PROJECT_NAME} Task)
+target_link_libraries(${PROJECT_NAME} TodoList)

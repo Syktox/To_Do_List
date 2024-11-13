@@ -1,8 +1,9 @@
 {
+	"archive" : {},
 	"artifacts" : 
 	[
 		{
-			"path" : "Todo_List"
+			"path" : "lib/libTodoList.a"
 		}
 	],
 	"backtrace" : 1,
@@ -10,12 +11,12 @@
 	{
 		"commands" : 
 		[
-			"add_executable",
-			"target_link_libraries"
+			"add_library",
+			"target_include_directories"
 		],
 		"files" : 
 		[
-			"CMakeLists.txt"
+			"lib/CMakeLists.txt"
 		],
 		"nodes" : 
 		[
@@ -25,19 +26,13 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 7,
+				"line" : 3,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 11,
-				"parent" : 0
-			},
-			{
-				"command" : 1,
-				"file" : 0,
-				"line" : 12,
+				"line" : 13,
 				"parent" : 0
 			}
 		]
@@ -73,49 +68,13 @@
 			]
 		}
 	],
-	"dependencies" : 
-	[
-		{
-			"backtrace" : 2,
-			"id" : "mylib::@306ed2d68c6501e8728f"
-		},
-		{
-			"backtrace" : 3,
-			"id" : "Task::@306ed2d68c6501e8728f"
-		}
-	],
-	"id" : "Todo_List::@6890427a1f51a3e7e1df",
-	"link" : 
-	{
-		"commandFragments" : 
-		[
-			{
-				"fragment" : "-g",
-				"role" : "flags"
-			},
-			{
-				"fragment" : "",
-				"role" : "flags"
-			},
-			{
-				"backtrace" : 2,
-				"fragment" : "lib/libmylib.a",
-				"role" : "libraries"
-			},
-			{
-				"backtrace" : 3,
-				"fragment" : "lib/libTask.a",
-				"role" : "libraries"
-			}
-		],
-		"language" : "CXX"
-	},
-	"name" : "Todo_List",
-	"nameOnDisk" : "Todo_List",
+	"id" : "TodoList::@306ed2d68c6501e8728f",
+	"name" : "TodoList",
+	"nameOnDisk" : "libTodoList.a",
 	"paths" : 
 	{
-		"build" : ".",
-		"source" : "."
+		"build" : "lib",
+		"source" : "lib"
 	},
 	"sourceGroups" : 
 	[
@@ -132,9 +91,9 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/main.cpp",
+			"path" : "lib/TodoList.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
-	"type" : "EXECUTABLE"
+	"type" : "STATIC_LIBRARY"
 }
