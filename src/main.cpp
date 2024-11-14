@@ -1,4 +1,7 @@
 #include <iostream>
+#include <nlohmann/json.hpp>
+#include <wx/wx.h>
+
 import Task;
 import TodoList;
 
@@ -11,13 +14,13 @@ int main(int argc, char *argv[]) {
     tl.addTask(task);
     tl.addTask(task2);
     tl.addTask(task3);
-
+    
+    Task currTask = tl.finishTask(task2);
     tl.printAllTasks();
-
-    tl.deleteTask("Task 1");
-
-    std::cout << "__---___----__-----------" << std::endl;
-    tl.printAllTasks();
+    std::cout << "////////////\n";
+    time_t time = currTask.getCompletedAt();
+    
+    std::cout << "Completed: " << std::ctime(&time);
     
     
     return 0;

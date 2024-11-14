@@ -15,6 +15,7 @@ public:
     void addTask(Task task);
     void printAllTasks();
     void deleteTask(std::string name_of_task);
+    Task finishTask(Task);
 };
 
 void TodoList::addTask(Task task)
@@ -36,4 +37,14 @@ void TodoList::deleteTask(std::string name_of_task)
         return task.getName() == name_of_task;
     });
 }
+
+Task TodoList::finishTask(Task task)
+{
+    task.setCompleted(true);
+    task.setCompletedAt(std::time(nullptr));
+    Task currTask = task;
+    deleteTask(task.getName());
+    return currTask;
+}
+
 
