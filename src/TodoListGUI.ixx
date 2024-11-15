@@ -9,10 +9,8 @@ import MainFrame;
 export class TodoListGUI : public wxApp
 {
 public:
-    bool OnInit();
+    virtual bool OnInit();
 };
-
-wxIMPLEMENT_APP(TodoListGUI);
 
 bool TodoListGUI::OnInit()
 {

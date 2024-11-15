@@ -1,6 +1,12 @@
+module;
+
+#define __STDC_WANT_LIB_EXT1__ 1
+#include <ctime>
+
 export module Task;
 
 import std;
+
 
 export class Task {
 private: 
@@ -22,9 +28,9 @@ public:
     void print();
 };
 
-Task::Task(std::string name, std::string description) {
-    this->name = name;
-    this->description = description;
+Task::Task(std::string nameArg, std::string descriptionArg) {
+    this->name = nameArg;
+    this->description = descriptionArg;
     this->completed = false;
     this->created = std::time(0);
     this->completedAt = 0;
@@ -42,8 +48,8 @@ bool Task::isCompleted() {
     return this->completed;
 }
 
-void Task::setCompleted(bool completed) {
-    this->completed = completed;
+void Task::setCompleted(bool completedArg) {
+    this->completed = completedArg;
 }
 
 std::time_t Task::getCreated() {
@@ -54,16 +60,17 @@ std::time_t  Task::getCompletedAt() {
     return this->completedAt;
 }
 
-void Task::setCompletedAt(std::time_t completedAt) {
-    this->completedAt = completedAt;
+void Task::setCompletedAt(std::time_t completedAtArg) {
+    this->completedAt = completedAtArg;
 }
 
 void Task::print() {
+    char str[26];
     std::cout << "Task: " << this->name << std::endl;
     std::cout << "Description: " << this->description << std::endl;
-    std::cout << "Created: " << std::ctime(&this->created);
+    std::cout << "Created: " << ctime_s(str, sizeof(str), &this->created);
     if (this->completed) {
-        std::cout << "Completed: " << std::ctime(&this->completedAt);
+        std::cout << "Completed: " << ctime_s(str, sizeof(str), &this->completedAt);
     }
 }
 
