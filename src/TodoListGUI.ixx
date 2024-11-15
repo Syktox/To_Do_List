@@ -14,8 +14,8 @@ public:
 
 bool TodoListGUI::OnInit()
 {
-    MainFrame* mainFrame = new MainFrame("Todo List GUI");
-    mainFrame->Show();
+    MainFrame* frame = new MainFrame();
+    frame->Show();
     return true;
 };
 
