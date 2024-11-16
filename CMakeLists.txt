@@ -10,10 +10,12 @@ find_package(wxWidgets CONFIG REQUIRED)
 	
 add_executable(Todo_List WIN32 ${SOURCES})
 
-file(GLOB SOURCES
+file(GLOB SOURCES 
     "src/*.h"
     "src/*.cpp"
     "src/*.ixx"
+	"resources/*.xpm"
+	"resources/*.ico"
     )
 
 

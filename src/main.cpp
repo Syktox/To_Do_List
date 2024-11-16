@@ -6,5 +6,3 @@ import TodoListGUI;
 #endif
 
 wxIMPLEMENT_APP(TodoListGUI);
-
-

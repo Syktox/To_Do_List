@@ -1,6 +1,9 @@
 module;
 
 #include <wx/wx.h>
+#include <wx/icon.h>
+
+
 
 export module MainFrame;
 
@@ -13,18 +16,25 @@ private:
     void OnHello(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
+    void OnAddButtonClicked(wxCommandEvent& event);
 };
 
 enum
 {
-    ID_Hello = 1
+    ID_Hello = 1,
+    ID_ADD = 2
 };
- 
 
 MainFrame::MainFrame()
-    : wxFrame(NULL, wxID_ANY, "Hello World")
+    : wxFrame(NULL, wxID_ANY, "Todo List")
 {
+    // Set Icon
+    wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
+    SetIcon(appIcon);
+    
+    // Menu Bar
     wxMenu *menuFile = new wxMenu;
+    menuFile->Append(ID_Hello, "Hello world");
     menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
                      "Help string shown in status bar for this menu item");
     menuFile->AppendSeparator();
@@ -38,7 +48,14 @@ MainFrame::MainFrame()
     menuBar->Append(menuHelp, "&Help");
  
     SetMenuBar( menuBar );
- 
+
+
+    wxPanel *panel = new wxPanel(this, wxID_ANY);
+    wxButton* AddButton = new wxButton(panel, wxID_ANY, wxT("Add"),
+                        wxPoint(150,50), wxSize(100, 35));
+    AddButton->Bind(wxEVT_BUTTON, &MainFrame::OnAddButtonClicked, this);
+    
+    
     CreateStatusBar();
     SetStatusText("Welcome to wxWidgets!");
  
@@ -64,4 +81,10 @@ void MainFrame::OnHello(wxCommandEvent& event)
 {
     event.Skip();   
     wxLogMessage("Hello world from wxWidgets!");
+}
+
+void MainFrame::OnAddButtonClicked(wxCommandEvent& event)
+{
+    event.Skip();
+    wxMessageBox("Bro i dont know what i am doing");
 }
