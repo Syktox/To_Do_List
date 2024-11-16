@@ -3,9 +3,9 @@ module;
 #include <wx/wx.h>
 #include <wx/icon.h>
 
-
-
 export module MainFrame;
+
+
 
 export class MainFrame : public wxFrame
 {
@@ -22,7 +22,9 @@ private:
 enum
 {
     ID_Hello = 1,
-    ID_ADD = 2
+    ID_ADD = 2,
+    ID_DELETE = 3,
+    ID_VIEWTODOLISTS = 4
 };
 
 MainFrame::MainFrame()
@@ -34,17 +36,21 @@ MainFrame::MainFrame()
     
     // Menu Bar
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(ID_Hello, "Hello world");
-    menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-                     "Help string shown in status bar for this menu item");
+    menuFile->Append(ID_ADD, "Add new Todo List");
+    menuFile->Append(ID_DELETE, "Delete a TodoList");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
+
+    // Should show the avalible To Do Lists
+    wxMenu *vieTodoListMenu = new wxMenu;
+    
  
     wxMenu *menuHelp = new wxMenu;
     menuHelp->Append(wxID_ABOUT);
  
     wxMenuBar *menuBar = new wxMenuBar;
     menuBar->Append(menuFile, "&File");
+    menuBar->Append(vieTodoListMenu, "&To Do Lists");
     menuBar->Append(menuHelp, "&Help");
  
     SetMenuBar( menuBar );
