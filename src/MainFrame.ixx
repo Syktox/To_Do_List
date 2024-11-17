@@ -30,23 +30,20 @@ enum
 
 MainFrame::MainFrame()
     : wxFrame(NULL, wxID_ANY, "Todo List")
-{
+{    
+    wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
+    SetIcon(appIcon);
+    
     SetSize(wxSize(300, 400));
     SetMinSize(wxSize(300, 400));
     SetMaxSize(wxSize(300, 400));
     
-    // Set Icon
-    wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
-    SetIcon(appIcon);
-    
-    // Menu Bar
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(ID_ADD, "Add new Todo List");
     menuFile->Append(ID_DELETE, "Delete a TodoList");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
 
-    // Should show the avalible To Do Lists
     wxMenu *vieTodoListMenu = new wxMenu;
     
     wxMenu *menuHelp = new wxMenu;
@@ -61,9 +58,9 @@ MainFrame::MainFrame()
     
     wxPanel *panel = new wxPanel(this, ID_ADD);
     wxButton* AddButton = new wxButton(panel, ID_ADD, wxT("Add"),
-                        wxPoint(10,50), wxSize(100, 35));
+                        wxPoint(10,5), wxSize(100, 35));
     wxButton* DeleteButton = new wxButton(panel, ID_DELETE, wxT("Delete"),
-                        wxPoint(60,50), wxSize(100, 35));
+                        wxPoint(170,5), wxSize(100, 35));
     
     DeleteButton->Bind(wxEVT_BUTTON, &MainFrame::OnDeleteButtonClicked, this);
     AddButton->Bind(wxEVT_BUTTON, &MainFrame::OnAddButtonClicked, this);
