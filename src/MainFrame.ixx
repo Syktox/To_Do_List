@@ -5,7 +5,7 @@ module;
 
 export module MainFrame;
 
-
+import TodoList;
 
 export class MainFrame : public wxFrame
 {
@@ -17,6 +17,7 @@ private:
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnAddButtonClicked(wxCommandEvent& event);
+    void OnDeleteButtonClicked(wxCommandEvent& event);
 };
 
 enum
@@ -30,6 +31,10 @@ enum
 MainFrame::MainFrame()
     : wxFrame(NULL, wxID_ANY, "Todo List")
 {
+    SetSize(wxSize(300, 400));
+    SetMinSize(wxSize(300, 400));
+    SetMaxSize(wxSize(300, 400));
+    
     // Set Icon
     wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
     SetIcon(appIcon);
@@ -44,7 +49,6 @@ MainFrame::MainFrame()
     // Should show the avalible To Do Lists
     wxMenu *vieTodoListMenu = new wxMenu;
     
- 
     wxMenu *menuHelp = new wxMenu;
     menuHelp->Append(wxID_ABOUT);
  
@@ -54,17 +58,17 @@ MainFrame::MainFrame()
     menuBar->Append(menuHelp, "&Help");
  
     SetMenuBar( menuBar );
-
-
-    wxPanel *panel = new wxPanel(this, wxID_ANY);
-    wxButton* AddButton = new wxButton(panel, wxID_ANY, wxT("Add"),
-                        wxPoint(150,50), wxSize(100, 35));
+    
+    wxPanel *panel = new wxPanel(this, ID_ADD);
+    wxButton* AddButton = new wxButton(panel, ID_ADD, wxT("Add"),
+                        wxPoint(10,50), wxSize(100, 35));
+    wxButton* DeleteButton = new wxButton(panel, ID_DELETE, wxT("Delete"),
+                        wxPoint(60,50), wxSize(100, 35));
+    
+    DeleteButton->Bind(wxEVT_BUTTON, &MainFrame::OnDeleteButtonClicked, this);
     AddButton->Bind(wxEVT_BUTTON, &MainFrame::OnAddButtonClicked, this);
+
     
-    
-    CreateStatusBar();
-    SetStatusText("Welcome to wxWidgets!");
- 
     Bind(wxEVT_MENU, &MainFrame::OnHello, this, ID_Hello);
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
@@ -79,8 +83,7 @@ void MainFrame::OnExit(wxCommandEvent& event)
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
     event.Skip();   
-    wxMessageBox("This is a wxWidgets Hello World example",
-                 "About Hello World", wxOK | wxICON_INFORMATION);
+    wxMessageBox("Written by Markus Kammerstetter","", wxOK | wxICON_INFORMATION);
 }
  
 void MainFrame::OnHello(wxCommandEvent& event)
@@ -92,5 +95,12 @@ void MainFrame::OnHello(wxCommandEvent& event)
 void MainFrame::OnAddButtonClicked(wxCommandEvent& event)
 {
     event.Skip();
-    wxMessageBox("Bro i dont know what i am doing");
+    wxMessageBox("A new Todo List was created");
+    TodoList tdl = TodoList();
+}
+
+void MainFrame::OnDeleteButtonClicked(wxCommandEvent& event)
+{
+    event.Skip();
+    wxMessageBox("Deleted a todolist");
 }
