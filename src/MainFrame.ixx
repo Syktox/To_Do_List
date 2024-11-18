@@ -13,7 +13,6 @@ public:
     MainFrame();
 
 private:
-    void OnHello(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnAddButtonClicked(wxCommandEvent& event);
@@ -25,10 +24,8 @@ MainFrame::MainFrame()
 {    
     wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
     SetIcon(appIcon);
-    
     SetSize(wxSize(300, 400));
-    SetMinSize(wxSize(300, 400));
-    SetMaxSize(wxSize(300, 400));
+    
     
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(wxID_ANY, "Add new Todo List");
@@ -71,12 +68,6 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 {
     event.Skip();   
     wxMessageBox("Written by Markus Kammerstetter","", wxOK | wxICON_INFORMATION);
-}
- 
-void MainFrame::OnHello(wxCommandEvent& event)
-{
-    event.Skip();   
-    wxLogMessage("Hello world from wxWidgets!");
 }
 
 void MainFrame::OnAddButtonClicked(wxCommandEvent& event)
