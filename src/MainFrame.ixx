@@ -20,14 +20,6 @@ private:
     void OnDeleteButtonClicked(wxCommandEvent& event);
 };
 
-enum
-{
-    ID_Hello = 1,
-    ID_ADD = 2,
-    ID_DELETE = 3,
-    ID_VIEWTODOLISTS = 4
-};
-
 MainFrame::MainFrame()
     : wxFrame(NULL, wxID_ANY, "Todo List")
 {    
@@ -39,8 +31,8 @@ MainFrame::MainFrame()
     SetMaxSize(wxSize(300, 400));
     
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(ID_ADD, "Add new Todo List");
-    menuFile->Append(ID_DELETE, "Delete a TodoList");
+    menuFile->Append(wxID_ANY, "Add new Todo List");
+    menuFile->Append(wxID_ANY, "Delete a TodoList");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
 
@@ -53,20 +45,18 @@ MainFrame::MainFrame()
     menuBar->Append(menuFile, "&File");
     menuBar->Append(vieTodoListMenu, "&To Do Lists");
     menuBar->Append(menuHelp, "&Help");
- 
+    
     SetMenuBar( menuBar );
     
-    wxPanel *panel = new wxPanel(this, ID_ADD);
-    wxButton* AddButton = new wxButton(panel, ID_ADD, wxT("Add"),
+    wxPanel *panel = new wxPanel(this, wxID_ANY);
+    wxButton* AddButton = new wxButton(panel, wxID_ANY, wxT("Add"),
                         wxPoint(10,5), wxSize(100, 35));
-    wxButton* DeleteButton = new wxButton(panel, ID_DELETE, wxT("Delete"),
+    wxButton* DeleteButton = new wxButton(panel, wxID_ANY, wxT("Delete"),
                         wxPoint(170,5), wxSize(100, 35));
     
     DeleteButton->Bind(wxEVT_BUTTON, &MainFrame::OnDeleteButtonClicked, this);
     AddButton->Bind(wxEVT_BUTTON, &MainFrame::OnAddButtonClicked, this);
-
     
-    Bind(wxEVT_MENU, &MainFrame::OnHello, this, ID_Hello);
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
 }
