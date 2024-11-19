@@ -14,6 +14,7 @@ public:
     MainFrame();
 
 private:
+    wxCheckBox *checkbox;
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnAddButtonClicked(wxCommandEvent& event);
@@ -57,6 +58,9 @@ MainFrame::MainFrame() : wxFrame(NULL, wxID_ANY, "Todo List")
                         wxPoint(10,5), wxSize(100, 35));
     wxButton* DeleteButton = new wxButton(panel, wxID_ANY, wxT("Delete"),
                         wxPoint(170,5), wxSize(100, 35));
+
+    Task t = Task("Task 1", "Programm");
+    checkbox = new wxCheckBox(panel, wxID_ANY, t.getName());
     
     DeleteButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     AddButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);

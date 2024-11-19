@@ -17,6 +17,7 @@ bool TodoListGUI::OnInit()
     MainFrame* frame = new MainFrame();
     frame->SetMinSize(wxSize(300, 400));
     frame->SetMaxSize(wxSize(300, 400));
+    frame->CenterOnScreen();
     frame->Show();
     return true;
 };
