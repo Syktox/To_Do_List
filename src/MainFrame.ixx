@@ -1,10 +1,12 @@
 module;
 
+#include <vector>
 #include <wx/wx.h>
 #include <wx/icon.h>
 
 export module MainFrame;
 
+import std;
 import TodoList;
 import Task;
 
@@ -18,6 +20,7 @@ private:
     wxCheckBox *checkbox;
     wxCheckListBox *checkboxList;
     wxTextCtrl *nameOfTask;
+    std::vector<Task> tasks;
     
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
@@ -30,10 +33,14 @@ private:
 class CreateTaskWindow : public wxFrame
 {
 private:
-    wxTextCtrl* text;
+    wxTextCtrl* taskName;
+    wxTextCtrl* taskDescription;
+    wxPanel* mainPanel;
+    
 public:
     CreateTaskWindow();
-    wxTextCtrl* GetTextCtrl();
+    wxTextCtrl* GetTaskName();
+    wxTextCtrl* GetTaskDescription();
 };
 
 enum
@@ -79,11 +86,20 @@ MainFrame::MainFrame() : wxFrame(NULL, wxID_ANY, "Todo List")
                         wxPoint(150,10), wxSize(120, 35));
     checkboxList = new wxCheckListBox(mainPanel, wxID_ANY,
                         wxPoint(10,55), wxSize(260,270));
+
+    tasks.insert(tasks.begin(), Task("Task 1", "No"));
+    tasks.insert(tasks.begin(), Task("Task 2", "Nod"));
+    tasks.insert(tasks.begin(), Task("Task 4", "No"));
+    tasks.insert(tasks.begin(), Task("Task 3", "No"));
+    
+    for (int i = 0; i < tasks.size(); i++)
+    {
+        checkboxList->Insert(tasks.at(i).getName(), checkboxList->GetCount());
+    }
+   
     
     AddButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     DeleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
-
-    
 }
 
 void MainFrame::OnExit(wxCommandEvent& event)
@@ -128,10 +144,22 @@ void MainFrame::DeleteTaskButton(wxCommandEvent& evt)
 CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task")
 {
     CreateTaskWindow::SetBackgroundColour(*wxWHITE);
-    text = new wxTextCtrl(this, wxID_ANY);
+    SetSize(wxSize(400, 300));
+    CreateTaskWindow::SetMinSize(wxSize(400, 300));
+    CreateTaskWindow::SetMaxSize(wxSize(400, 300));
+    
+    mainPanel = new wxPanel(this, wxID_ANY);
+    
+    taskName = new wxTextCtrl(mainPanel, wxID_ANY, "", wxPoint(20, 20), wxDefaultSize);
+    taskDescription = new wxTextCtrl(mainPanel, wxID_ANY, "", wxPoint(20, 70), wxDefaultSize);
+    
 }
 
-wxTextCtrl* CreateTaskWindow::GetTextCtrl()
+wxTextCtrl* CreateTaskWindow::GetTaskName()
 {
-    return text;
+    return taskName;
+}
+wxTextCtrl* CreateTaskWindow::GetTaskDescription()
+{
+    return taskDescription;
 }
