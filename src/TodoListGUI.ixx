@@ -18,6 +18,7 @@ bool TodoListGUI::OnInit()
     frame->SetMinSize(wxSize(300, 400));
     frame->SetMaxSize(wxSize(300, 400));
     frame->CenterOnScreen();
+    frame->SetBackgroundColour(*wxWHITE);
     frame->Show();
     return true;
 };

@@ -14,7 +14,10 @@ public:
     MainFrame();
 
 private:
+    wxPanel *mainPanel;
     wxCheckBox *checkbox;
+    wxCheckListBox *checkboxList;
+    
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnAddButtonClicked(wxCommandEvent& event);
@@ -53,14 +56,18 @@ MainFrame::MainFrame() : wxFrame(NULL, wxID_ANY, "Todo List")
     
     SetMenuBar( menuBar );
     
-    wxPanel *panel = new wxPanel(this, wxID_ANY);
-    wxButton* AddButton = new wxButton(panel, wxID_ANY, wxT("Add"),
-                        wxPoint(10,5), wxSize(100, 35));
-    wxButton* DeleteButton = new wxButton(panel, wxID_ANY, wxT("Delete"),
-                        wxPoint(170,5), wxSize(100, 35));
+    mainPanel = new wxPanel(this, wxID_ANY);
+    wxButton* AddButton = new wxButton(mainPanel, wxID_ANY, wxT("Add"),
+                        wxPoint(10,10), wxSize(120, 35));
+    wxButton* DeleteButton = new wxButton(mainPanel, wxID_ANY, wxT("Delete"),
+                        wxPoint(150,10), wxSize(120, 35));
 
+    checkboxList = new wxCheckListBox(mainPanel, wxID_ANY,
+                        wxPoint(10,55), wxSize(260,270));
+
+    
     Task t = Task("Task 1", "Programm");
-    checkbox = new wxCheckBox(panel, wxID_ANY, t.getName());
+    checkbox = new wxCheckBox(checkboxList, wxID_ANY, t.getName());
     
     DeleteButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     AddButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
