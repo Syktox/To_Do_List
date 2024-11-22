@@ -24,8 +24,8 @@ private:
     
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
-    void OnAddButtonClicked(wxCommandEvent& event);
-    void OnDeleteButtonClicked(wxCommandEvent& event);
+    void OnAddMenuButtonClicked(wxCommandEvent& event);
+    void onDeleteMenuButtonClicked(wxCommandEvent& event);
     void CreateTaskButton(wxCommandEvent& evt);
     void DeleteTaskButton(wxCommandEvent& evt);
 };
@@ -36,11 +36,17 @@ private:
     wxTextCtrl* taskName;
     wxTextCtrl* taskDescription;
     wxPanel* mainPanel;
-    
+    wxStaticText* name;
+    wxStaticText* description;
+    wxButton* createButton;
+    wxButton* quitButton;
+
 public:
     CreateTaskWindow();
     wxTextCtrl* GetTaskName();
     wxTextCtrl* GetTaskDescription();
+    void QuitButtonClicked(wxCommandEvent& evt);
+    void CreateButtonClicked(wxCommandEvent& evt);
 };
 
 enum
@@ -49,7 +55,7 @@ enum
     DELETE_TODOLIST_ID = 3
 };
 
-MainFrame::MainFrame() : wxFrame(NULL, wxID_ANY, "Todo List")
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
 {    
     wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
     SetIcon(appIcon);
@@ -76,8 +82,8 @@ MainFrame::MainFrame() : wxFrame(NULL, wxID_ANY, "Todo List")
     
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
-    Bind(wxEVT_MENU, &MainFrame::OnAddButtonClicked, this, ADD_TODOLIST_ID);
-    Bind(wxEVT_MENU, &MainFrame::OnDeleteButtonClicked, this, DELETE_TODOLIST_ID);
+    Bind(wxEVT_MENU, &MainFrame::OnAddMenuButtonClicked, this, ADD_TODOLIST_ID);
+    Bind(wxEVT_MENU, &MainFrame::onDeleteMenuButtonClicked, this, DELETE_TODOLIST_ID);
     
     mainPanel = new wxPanel(this, wxID_ANY);
     wxButton* AddButton = new wxButton(mainPanel, wxID_ANY, wxT("Add"),
@@ -114,14 +120,14 @@ void MainFrame::OnAbout(wxCommandEvent& event)
     wxMessageBox("Written by Markus Kammerstetter","", wxOK | wxICON_INFORMATION);
 }
 
-void MainFrame::OnAddButtonClicked(wxCommandEvent& event)
+void MainFrame::OnAddMenuButtonClicked(wxCommandEvent& event)
 {
     event.Skip();
     wxMessageBox("A new Todo List was created");
     TodoList tdl = TodoList();
 }
 
-void MainFrame::OnDeleteButtonClicked(wxCommandEvent& event)
+void MainFrame::onDeleteMenuButtonClicked(wxCommandEvent& event)
 {
     event.Skip();
     wxMessageBox("Deleted a todolist");
@@ -133,26 +139,56 @@ void MainFrame::CreateTaskButton(wxCommandEvent& evt)
     CreateTaskWindow* AddFrame = new CreateTaskWindow();
     AddFrame->CenterOnParent();
     AddFrame->Show(true);
-}
+    
+} // TODO
 
 void MainFrame::DeleteTaskButton(wxCommandEvent& evt)
 {
     evt.Skip();
-}
-
+} // TODO
 
 CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task")
 {
+    wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
+    SetIcon(appIcon);
     CreateTaskWindow::SetBackgroundColour(*wxWHITE);
-    SetSize(wxSize(400, 300));
-    CreateTaskWindow::SetMinSize(wxSize(400, 300));
-    CreateTaskWindow::SetMaxSize(wxSize(400, 300));
+    SetSize(wxSize(400, 400));
+    CreateTaskWindow::SetMinSize(wxSize(400, 400));
+    CreateTaskWindow::SetMaxSize(wxSize(400, 400));
     
     mainPanel = new wxPanel(this, wxID_ANY);
-    
-    taskName = new wxTextCtrl(mainPanel, wxID_ANY, "", wxPoint(20, 20), wxDefaultSize);
-    taskDescription = new wxTextCtrl(mainPanel, wxID_ANY, "", wxPoint(20, 70), wxDefaultSize);
-    
+    name = new wxStaticText(mainPanel, wxID_ANY, wxT("Task Name"),
+                                    wxPoint(20, 20), wxDefaultSize, 0);
+    description = new wxStaticText(mainPanel, wxID_ANY, wxT("Task Description"),
+                                    wxPoint(20, 120), wxDefaultSize, 0);
+    taskName = new wxTextCtrl(mainPanel, wxID_ANY, "",
+                                    wxPoint(20, 50), wxSize(345, 25));
+    taskDescription = new wxTextCtrl(mainPanel, wxID_ANY, "",
+                                    wxPoint(20, 150), wxSize(345, 90));
+    createButton = new wxButton(mainPanel, wxID_ANY, wxT("Create Task"),
+                                    wxPoint(225, 275), wxSize(100, 50));
+    quitButton = new wxButton(mainPanel, wxID_ANY, wxT("Quit"),
+                                    wxPoint(50, 275), wxSize(100, 50));
+    quitButton->Bind(wxEVT_BUTTON, &CreateTaskWindow::QuitButtonClicked, this);
+    createButton->Bind(wxEVT_BUTTON, &CreateTaskWindow::CreateButtonClicked, this);
+}
+
+void CreateTaskWindow::QuitButtonClicked(wxCommandEvent& evt)
+{
+    evt.Skip();
+    Close(true);
+}
+
+void CreateTaskWindow::CreateButtonClicked(wxCommandEvent& evt)
+{
+    evt.Skip();
+    wxString nameOfTask = taskName->GetValue();
+    wxString descriptionOfTask = taskDescription->GetValue();
+    if (nameOfTask.empty())
+    {
+        wxMessageBox("No task name selected");
+        Close(true);
+    }
 }
 
 wxTextCtrl* CreateTaskWindow::GetTaskName()
