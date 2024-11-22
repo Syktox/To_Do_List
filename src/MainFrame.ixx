@@ -21,13 +21,16 @@ private:
     wxCheckListBox *checkboxList;
     wxTextCtrl *nameOfTask;
     std::vector<Task> tasks;
-    
+    int currentPosition = 0;
+
+    void AddControlls();
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnAddMenuButtonClicked(wxCommandEvent& event);
     void onDeleteMenuButtonClicked(wxCommandEvent& event);
     void CreateTaskButton(wxCommandEvent& evt);
     void DeleteTaskButton(wxCommandEvent& evt);
+    void UpdateTaskList();
 };
 
 class CreateTaskWindow : public wxFrame
@@ -40,13 +43,16 @@ private:
     wxStaticText* description;
     wxButton* createButton;
     wxButton* quitButton;
+    wxString taskNameString;
+    wxString taskDescriptionString;
+    
+    void QuitButtonClicked(wxCommandEvent& evt);
+    void CreateButtonClicked(wxCommandEvent& evt);
 
 public:
     CreateTaskWindow();
-    wxTextCtrl* GetTaskName();
-    wxTextCtrl* GetTaskDescription();
-    void QuitButtonClicked(wxCommandEvent& evt);
-    void CreateButtonClicked(wxCommandEvent& evt);
+    wxString GetTaskName();
+    wxString GetTaskDescription();
 };
 
 enum
@@ -57,6 +63,20 @@ enum
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
 {    
+    AddControlls();
+
+    tasks.insert(tasks.begin(), Task("Task 1", "No"));
+    tasks.insert(tasks.begin(), Task("Task 2", "Nod"));
+    tasks.insert(tasks.begin(), Task("Task 4", "No"));
+    tasks.insert(tasks.begin(), Task("Task 3", "No"));
+
+    // todo json file einbinden
+    
+    UpdateTaskList();
+}
+
+void MainFrame::AddControlls()
+{
     wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
     SetIcon(appIcon);
     SetSize(wxSize(300, 400));
@@ -92,21 +112,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
                         wxPoint(150,10), wxSize(120, 35));
     checkboxList = new wxCheckListBox(mainPanel, wxID_ANY,
                         wxPoint(10,55), wxSize(260,270));
-
-    tasks.insert(tasks.begin(), Task("Task 1", "No"));
-    tasks.insert(tasks.begin(), Task("Task 2", "Nod"));
-    tasks.insert(tasks.begin(), Task("Task 4", "No"));
-    tasks.insert(tasks.begin(), Task("Task 3", "No"));
-    
-    for (int i = 0; i < tasks.size(); i++)
-    {
-        checkboxList->Insert(tasks.at(i).getName(), checkboxList->GetCount());
-    }
-   
     
     AddButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     DeleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
 }
+
 
 void MainFrame::OnExit(wxCommandEvent& event)
 {
@@ -139,13 +149,30 @@ void MainFrame::CreateTaskButton(wxCommandEvent& evt)
     CreateTaskWindow* AddFrame = new CreateTaskWindow();
     AddFrame->CenterOnParent();
     AddFrame->Show(true);
-    
-} // TODO
+    AddFrame->Bind(wxEVT_CLOSE_WINDOW, [this, AddFrame](wxCloseEvent&)
+    {
+        wxString name = AddFrame->GetTaskName();
+        wxString description = AddFrame->GetTaskDescription();
+        tasks.insert(tasks.begin(),
+        Task(name.ToStdString(), description.ToStdString()));
+        UpdateTaskList();
+        AddFrame->Destroy();
+    });
+}
 
 void MainFrame::DeleteTaskButton(wxCommandEvent& evt)
 {
     evt.Skip();
 } // TODO
+
+void MainFrame::UpdateTaskList()
+{
+    while (currentPosition < tasks.size())
+    {
+        checkboxList->Insert(tasks.at(0).getName(), checkboxList->GetCount());
+        currentPosition++;
+    }
+}
 
 CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task")
 {
@@ -182,20 +209,23 @@ void CreateTaskWindow::QuitButtonClicked(wxCommandEvent& evt)
 void CreateTaskWindow::CreateButtonClicked(wxCommandEvent& evt)
 {
     evt.Skip();
-    wxString nameOfTask = taskName->GetValue();
-    wxString descriptionOfTask = taskDescription->GetValue();
-    if (nameOfTask.empty())
+    taskNameString = taskName->GetValue();
+    taskDescriptionString = taskDescription->GetValue();
+    if (taskNameString.empty())
     {
         wxMessageBox("No task name selected");
         Close(true);
     }
+    wxMessageBox("Task: " + taskNameString + " created");
+    Close();
 }
 
-wxTextCtrl* CreateTaskWindow::GetTaskName()
+wxString CreateTaskWindow::GetTaskName()
 {
-    return taskName;
+    return taskNameString;
 }
-wxTextCtrl* CreateTaskWindow::GetTaskDescription()
+
+wxString CreateTaskWindow::GetTaskDescription()
 {
-    return taskDescription;
+    return taskDescriptionString;
 }
