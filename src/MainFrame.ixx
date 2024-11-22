@@ -21,7 +21,6 @@ private:
     wxCheckListBox *checkboxList;
     wxTextCtrl *nameOfTask;
     std::vector<Task> tasks;
-    int currentPosition = 0;
 
     void AddControlls();
     void OnExit(wxCommandEvent& event);
@@ -167,10 +166,10 @@ void MainFrame::DeleteTaskButton(wxCommandEvent& evt)
 
 void MainFrame::UpdateTaskList()
 {
-    while (currentPosition < tasks.size())
+    checkboxList->Clear();
+    for (auto& task : tasks)
     {
-        checkboxList->Insert(tasks.at(0).getName(), checkboxList->GetCount());
-        currentPosition++;
+        checkboxList->Insert(task.getName(), 0);
     }
 }
 
