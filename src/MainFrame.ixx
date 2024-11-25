@@ -117,7 +117,7 @@ void MainFrame::AddControls()
     deleteButton = new wxButton(mainPanel, wxID_ANY, wxT("Delete"),
                         wxPoint(150,10), wxSize(120, 35));
     checkboxList = new wxCheckListBox(mainPanel, wxID_ANY,
-                        wxPoint(10,55), wxSize(260,270));
+                        wxPoint(10,55), wxSize(260,270), 0, nullptr, wxWANTS_CHARS);
 }
 
 void MainFrame::BindEventHandlers()
