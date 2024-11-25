@@ -17,12 +17,11 @@ public:
 
 private:
     wxPanel *mainPanel;
-    wxCheckBox *checkbox;
     wxCheckListBox *checkboxList;
     wxTextCtrl *nameOfTask;
     std::vector<Task> tasks;
 
-    void AddControlls();
+    void AddControls();
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnAddMenuButtonClicked(wxCommandEvent& event);
@@ -62,19 +61,24 @@ enum
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
 {    
-    AddControlls();
+    AddControls();
 
     tasks.insert(tasks.begin(), Task("Task 1", "No"));
     tasks.insert(tasks.begin(), Task("Task 2", "Nod"));
-    tasks.insert(tasks.begin(), Task("Task 4", "No"));
     tasks.insert(tasks.begin(), Task("Task 3", "No"));
+    tasks.insert(tasks.begin(), Task("Task 4", "No"));
 
+    for (std::vector<Task>::iterator it = tasks.begin(); it != tasks.end(); it++)
+    {
+        std::cout << it->getName() << std::endl;
+    }
+    
     // todo json file einbinden
     
     UpdateTaskList();
 }
 
-void MainFrame::AddControlls()
+void MainFrame::AddControls()
 {
     wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
     SetIcon(appIcon);
@@ -117,15 +121,13 @@ void MainFrame::AddControlls()
 }
 
 
-void MainFrame::OnExit(wxCommandEvent& event)
+void MainFrame::OnExit(wxCommandEvent&)
 {
-    event.Skip();   
     Close(true);
 }
  
-void MainFrame::OnAbout(wxCommandEvent& event)
+void MainFrame::OnAbout(wxCommandEvent&)
 {
-    event.Skip();   
     wxMessageBox("Written by Markus Kammerstetter","", wxOK | wxICON_INFORMATION);
 }
 
@@ -159,17 +161,18 @@ void MainFrame::CreateTaskButton(wxCommandEvent& evt)
     });
 }
 
-void MainFrame::DeleteTaskButton(wxCommandEvent& evt)
+void MainFrame::DeleteTaskButton(wxCommandEvent&)
 {
-    evt.Skip();
-} // TODO
+       
+    UpdateTaskList();
+}
 
 void MainFrame::UpdateTaskList()
 {
     checkboxList->Clear();
     for (auto& task : tasks)
     {
-        checkboxList->Insert(task.getName(), 0);
+        checkboxList->Insert(task.getName(), checkboxList->GetCount());
     }
 }
 
@@ -215,7 +218,6 @@ void CreateTaskWindow::CreateButtonClicked(wxCommandEvent& evt)
         wxMessageBox("No task name selected");
         Close(true);
     }
-    wxMessageBox("Task: " + taskNameString + " created");
     Close();
 }
 
