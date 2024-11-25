@@ -21,14 +21,17 @@ private:
     wxTextCtrl *nameOfTask;
     std::vector<Task> tasks;
 
+    
     void AddControls();
     void OnExit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
     void OnAddMenuButtonClicked(wxCommandEvent& event);
-    void onDeleteMenuButtonClicked(wxCommandEvent& event);
+    void OnDeleteMenuButtonClicked(wxCommandEvent& event);
     void CreateTaskButton(wxCommandEvent& evt);
     void DeleteTaskButton(wxCommandEvent& evt);
     void UpdateTaskList();
+    void LoadJSONFile();
+    void ClearTaskList(wxCommandEvent& evt);
 };
 
 class CreateTaskWindow : public wxFrame
@@ -56,22 +59,19 @@ public:
 enum
 {
     ADD_TODOLIST_ID = 2,
-    DELETE_TODOLIST_ID = 3
+    DELETE_TODOLIST_ID = 3,
+    CLEAR_TODOLIST_ID = 4
 };
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
 {    
     AddControls();
+    LoadJSONFile();
 
     tasks.insert(tasks.begin(), Task("Task 1", "No"));
     tasks.insert(tasks.begin(), Task("Task 2", "Nod"));
     tasks.insert(tasks.begin(), Task("Task 3", "No"));
     tasks.insert(tasks.begin(), Task("Task 4", "No"));
-
-    for (std::vector<Task>::iterator it = tasks.begin(); it != tasks.end(); it++)
-    {
-        std::cout << it->getName() << std::endl;
-    }
     
     // todo json file einbinden
     
@@ -89,8 +89,9 @@ void MainFrame::AddControls()
     CenterOnScreen();
     
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(ADD_TODOLIST_ID, "Add new Todo List");
-    menuFile->Append(DELETE_TODOLIST_ID, "Delete a TodoList");
+    menuFile->Append(ADD_TODOLIST_ID, "Add a new Todo List");
+    menuFile->Append(DELETE_TODOLIST_ID, "Delete this Todo List");
+    menuFile->Append(CLEAR_TODOLIST_ID, "Clear this Todo List");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
     wxMenu *vieTodoListMenu = new wxMenu;
@@ -106,7 +107,8 @@ void MainFrame::AddControls()
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &MainFrame::OnAddMenuButtonClicked, this, ADD_TODOLIST_ID);
-    Bind(wxEVT_MENU, &MainFrame::onDeleteMenuButtonClicked, this, DELETE_TODOLIST_ID);
+    Bind(wxEVT_MENU, &MainFrame::OnDeleteMenuButtonClicked, this, DELETE_TODOLIST_ID);
+    Bind(wxEVT_MENU, &MainFrame::ClearTaskList, this, CLEAR_TODOLIST_ID);
     
     mainPanel = new wxPanel(this, wxID_ANY);
     wxButton* AddButton = new wxButton(mainPanel, wxID_ANY, wxT("Add"),
@@ -119,7 +121,6 @@ void MainFrame::AddControls()
     AddButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     DeleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
 }
-
 
 void MainFrame::OnExit(wxCommandEvent&)
 {
@@ -138,7 +139,7 @@ void MainFrame::OnAddMenuButtonClicked(wxCommandEvent& event)
     TodoList tdl = TodoList();
 }
 
-void MainFrame::onDeleteMenuButtonClicked(wxCommandEvent& event)
+void MainFrame::OnDeleteMenuButtonClicked(wxCommandEvent& event)
 {
     event.Skip();
     wxMessageBox("Deleted a todolist");
@@ -164,7 +165,7 @@ void MainFrame::CreateTaskButton(wxCommandEvent& evt)
 void MainFrame::DeleteTaskButton(wxCommandEvent&)
 {
     wxArrayInt indices;
-    [[maybe_unused]] int checkedIndices = checkboxList->GetCheckedItems(indices);
+    checkboxList->GetCheckedItems(indices);
     std::ranges::reverse(indices.begin(), indices.end());
     for (const auto& i : indices)
     {
@@ -177,11 +178,6 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)
         }
     }
     UpdateTaskList();
-    std::cout << "\n\n" << std::endl;
-    for (Task task : tasks)
-    {
-        std::cout << task.getName() << std::endl;
-    }
 }
 
 void MainFrame::UpdateTaskList()
@@ -191,6 +187,17 @@ void MainFrame::UpdateTaskList()
     {
         checkboxList->Insert(task.getName(), checkboxList->GetCount());
     }
+}
+
+void MainFrame::LoadJSONFile()
+{
+    
+}
+
+void MainFrame::ClearTaskList(wxCommandEvent&)
+{
+    tasks.clear();
+    UpdateTaskList();
 }
 
 CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task")
