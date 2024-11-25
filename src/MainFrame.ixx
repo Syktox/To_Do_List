@@ -163,8 +163,25 @@ void MainFrame::CreateTaskButton(wxCommandEvent& evt)
 
 void MainFrame::DeleteTaskButton(wxCommandEvent&)
 {
-       
+    wxArrayInt indices;
+    [[maybe_unused]] int checkedIndices = checkboxList->GetCheckedItems(indices);
+    std::ranges::reverse(indices.begin(), indices.end());
+    for (const auto& i : indices)
+    {
+        if (i < tasks.size())
+        {
+            tasks.erase(tasks.begin() + i);
+        } else
+        {
+            wxLogWarning("Can't delete element", i);
+        }
+    }
     UpdateTaskList();
+    std::cout << "\n\n" << std::endl;
+    for (Task task : tasks)
+    {
+        std::cout << task.getName() << std::endl;
+    }
 }
 
 void MainFrame::UpdateTaskList()
