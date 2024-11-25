@@ -156,6 +156,11 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
     {
         wxString name = AddFrame->GetTaskName();
         wxString description = AddFrame->GetTaskDescription();
+        if (name.length() <= 0)
+        {
+            AddFrame->Destroy();
+            return;
+        }
         tasks.insert(tasks.begin(),
         Task(name.ToStdString(), description.ToStdString()));
         UpdateTaskList();
