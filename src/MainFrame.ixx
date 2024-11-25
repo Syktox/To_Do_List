@@ -17,21 +17,27 @@ public:
 
 private:
     wxPanel *mainPanel;
-    wxCheckListBox *checkboxList;
-    wxTextCtrl *nameOfTask;
     std::vector<Task> tasks;
-
+    wxCheckListBox* checkboxList;
+    wxButton* deleteButton;
+    wxButton* addButton;
     
     void AddControls();
-    void OnExit(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-    void OnAddMenuButtonClicked(wxCommandEvent& event);
-    void OnDeleteMenuButtonClicked(wxCommandEvent& event);
+    void BindEventHandlers();
+    void OnExit(wxCommandEvent& evt);
+    void OnAbout(wxCommandEvent& evt);
+    void OnAddMenuButtonClicked(wxCommandEvent& evt);
+    void OnDeleteMenuButtonClicked(wxCommandEvent& evt);
     void CreateTaskButton(wxCommandEvent& evt);
     void DeleteTaskButton(wxCommandEvent& evt);
     void UpdateTaskList();
     void LoadJSONFile();
     void ClearTaskList(wxCommandEvent& evt);
+    void OnListKeyDown(wxKeyEvent& evt);
+    void OnArrowUPKey();
+    void OnDeleteKey();
+    void OnArrowDOWNKey();
+    void OnEnterKey();
 };
 
 class CreateTaskWindow : public wxFrame
@@ -66,6 +72,7 @@ enum
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
 {    
     AddControls();
+    BindEventHandlers();
     LoadJSONFile();
 
     tasks.insert(tasks.begin(), Task("Task 1", "No"));
@@ -104,22 +111,26 @@ void MainFrame::AddControls()
     menuBar->Append(menuHelp, "&Help");
     MainFrame::SetMenuBar( menuBar );
     
+    mainPanel = new wxPanel(this, wxID_ANY);
+    addButton = new wxButton(mainPanel, wxID_ANY, wxT("Add"),
+                        wxPoint(10,10), wxSize(120, 35));
+    deleteButton = new wxButton(mainPanel, wxID_ANY, wxT("Delete"),
+                        wxPoint(150,10), wxSize(120, 35));
+    checkboxList = new wxCheckListBox(mainPanel, wxID_ANY,
+                        wxPoint(10,55), wxSize(260,270));
+}
+
+void MainFrame::BindEventHandlers()
+{
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &MainFrame::OnAddMenuButtonClicked, this, ADD_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::OnDeleteMenuButtonClicked, this, DELETE_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::ClearTaskList, this, CLEAR_TODOLIST_ID);
     
-    mainPanel = new wxPanel(this, wxID_ANY);
-    wxButton* AddButton = new wxButton(mainPanel, wxID_ANY, wxT("Add"),
-                        wxPoint(10,10), wxSize(120, 35));
-    wxButton* DeleteButton = new wxButton(mainPanel, wxID_ANY, wxT("Delete"),
-                        wxPoint(150,10), wxSize(120, 35));
-    checkboxList = new wxCheckListBox(mainPanel, wxID_ANY,
-                        wxPoint(10,55), wxSize(260,270));
-    
-    AddButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
-    DeleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
+    addButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
+    deleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
+    checkboxList->Bind(wxEVT_KEY_DOWN, &MainFrame::OnListKeyDown, this);
 }
 
 void MainFrame::OnExit(wxCommandEvent&)
@@ -205,6 +216,52 @@ void MainFrame::ClearTaskList(wxCommandEvent&)
     tasks.clear();
     UpdateTaskList();
 }
+
+void MainFrame::OnListKeyDown(wxKeyEvent& evt)
+{
+    switch (evt.GetKeyCode()) {
+        case WXK_BACK:
+            OnDeleteKey();
+            break;
+        case WXK_UP:
+            OnArrowUPKey();
+            break;
+        case WXK_DOWN:
+            OnArrowDOWNKey();
+            break;
+        case WXK_RETURN:
+            OnEnterKey();
+            break;
+    default:
+            std::cout << evt.GetKeyCode() << std::endl;
+            break;
+    }
+}
+
+void MainFrame::OnDeleteKey()
+{
+    wxMessageBox("Delete Key pressed");
+}
+
+void MainFrame::OnArrowUPKey()
+{
+    wxMessageBox("UP Key pressed");
+}
+
+void MainFrame::OnArrowDOWNKey()
+{
+    wxMessageBox("DOWN Key pressed");
+}
+
+void MainFrame::OnEnterKey()
+{
+    wxMessageBox("Enter Key pressed");
+}
+
+//
+// CREATETASK WINDOW
+//
+
 
 CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task")
 {
