@@ -129,7 +129,9 @@ void MainFrame::OnExit(wxCommandEvent&)
  
 void MainFrame::OnAbout(wxCommandEvent&)
 {
-    wxMessageBox("Written by Markus Kammerstetter","", wxOK | wxICON_INFORMATION);
+    wxMessageBox("Written by Markus Kammerstetter\n"
+                 "This should be a small to-do list designed to help me improve my C++ skills.",
+                 "Author Message", wxOK | wxICON_INFORMATION);
 }
 
 void MainFrame::OnAddMenuButtonClicked(wxCommandEvent& event)
@@ -145,12 +147,11 @@ void MainFrame::OnDeleteMenuButtonClicked(wxCommandEvent& event)
     wxMessageBox("Deleted a todolist");
 }
 
-void MainFrame::CreateTaskButton(wxCommandEvent& evt)
+void MainFrame::CreateTaskButton(wxCommandEvent&)
 {
-    evt.Skip();
     CreateTaskWindow* AddFrame = new CreateTaskWindow();
     AddFrame->CenterOnParent();
-    AddFrame->Show(true);
+    AddFrame->Show(true);   // fehler darunter
     AddFrame->Bind(wxEVT_CLOSE_WINDOW, [this, AddFrame](wxCloseEvent&)
     {
         wxString name = AddFrame->GetTaskName();
@@ -226,23 +227,21 @@ CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task"
     createButton->Bind(wxEVT_BUTTON, &CreateTaskWindow::CreateButtonClicked, this);
 }
 
-void CreateTaskWindow::QuitButtonClicked(wxCommandEvent& evt)
+void CreateTaskWindow::QuitButtonClicked(wxCommandEvent&)
 {
-    evt.Skip();
     Close(true);
 }
 
-void CreateTaskWindow::CreateButtonClicked(wxCommandEvent& evt)
+void CreateTaskWindow::CreateButtonClicked(wxCommandEvent&)
 {
-    evt.Skip();
     taskNameString = taskName->GetValue();
     taskDescriptionString = taskDescription->GetValue();
-    if (taskNameString.empty())
+    if (!taskNameString.empty())
     {
-        wxMessageBox("No task name selected");
         Close(true);
+        return;
     }
-    Close();
+    wxMessageBox("No task name entered");
 }
 
 wxString CreateTaskWindow::GetTaskName()
