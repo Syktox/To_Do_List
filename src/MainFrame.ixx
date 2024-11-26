@@ -219,7 +219,10 @@ void MainFrame::ClearTaskList(wxCommandEvent&)
 
 void MainFrame::OnListKeyDown(wxKeyEvent& evt)
 {
-    switch (evt.GetKeyCode()) {
+    wxArrayInt indices;
+    if (checkboxList->GetCheckedItems(indices) > 0)
+    {
+        switch (evt.GetKeyCode()) {
         case WXK_BACK:
             OnDeleteKey();
             break;
@@ -232,15 +235,17 @@ void MainFrame::OnListKeyDown(wxKeyEvent& evt)
         case WXK_RETURN:
             OnEnterKey();
             break;
-    default:
+        default:
             std::cout << evt.GetKeyCode() << std::endl;
             break;
+        }   
     }
 }
 
 void MainFrame::OnDeleteKey()
 {
-    wxMessageBox("Delete Key pressed");
+    wxCommandEvent dummyEvent(wxEVT_BUTTON, wxID_ANY);
+    DeleteTaskButton(dummyEvent);
 }
 
 void MainFrame::OnArrowUPKey()
