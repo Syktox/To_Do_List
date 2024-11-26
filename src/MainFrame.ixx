@@ -16,6 +16,7 @@ export class MainFrame : public wxFrame
 {
 public:
     MainFrame();
+    std::vector<Task> GetTasks();
 
 private:
     wxPanel *mainPanel;
@@ -24,7 +25,7 @@ private:
     wxButton* deleteButton;
     wxButton* addButton;
     wxButton* finishButton;
-
+    
     
     void AddControls();
     void BindEventHandlers();
@@ -92,6 +93,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
     // todo json file einbinden
     
     UpdateTaskList();
+}
+
+std::vector<Task> MainFrame::GetTasks()
+{
+    return tasks;
 }
 
 void MainFrame::AddControls()
@@ -214,9 +220,14 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
             AddFrame->Destroy();
             return;
         }
+
+        if (std::ranges::any_of(tasks, [&name, &description](auto& task){ return task.getName() == name; })) {
+            wxMessageBox("Task already exists");
+            AddFrame->Destroy();
+            return;
+        }
         tasks.insert(tasks.begin(),
         Task(name.ToStdString(), description.ToStdString()));
-        
         std::vector<std::string> taskNames;
         wxArrayInt index;
         int checkedItemSize = checkboxList->GetCheckedItems(index);
@@ -249,7 +260,8 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)
             wxLogWarning("Can't delete element", i);
         }
     }
-    UpdateTaskList();
+    checkboxList->Clear();
+    for (auto& task : tasks) checkboxList->Insert(task.getName(), checkboxList->GetCount());
 }
 
 void MainFrame::FinishTaskButton(wxCommandEvent&)
@@ -358,7 +370,7 @@ void CreateTaskWindow::CreateButtonClicked(wxCommandEvent&)
         Close(true);
         return;
     }
-    wxMessageBox("No task name entered");
+    wxMessageBox("No task name entered or task already exists");
 }
 
 wxString CreateTaskWindow::GetTaskName()
