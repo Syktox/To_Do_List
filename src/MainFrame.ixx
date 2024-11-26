@@ -1,6 +1,7 @@
 module;
 
 #include <iostream>
+#include <ostream>
 #include <vector>
 #include <wx/wx.h>
 #include <wx/icon.h>
@@ -152,13 +153,22 @@ void MainFrame::LoadJSONFile()
 
 void MainFrame::UpdateTaskList()
 {
-   // todo soll die ausgewaehlten elemente behalten 
-   
+    std::vector<std::string> taskNames;
+    wxArrayInt index;
+    int checkedItemSize = checkboxList->GetCheckedItems(index);
+    for (int i = 0; i < checkedItemSize; i++) {
+        taskNames.emplace_back(tasks.at(index[i]).getName());
+    }
     checkboxList->Clear();
     for (auto& task : tasks)
     {
         checkboxList->Insert(task.getName(), checkboxList->GetCount());
+        if (std::find(taskNames.begin(), taskNames.end(), task.getName()) != taskNames.end())
+        {
+            checkboxList->Check(checkboxList->GetCount() - 1, true);
+        }
     }
+    
 }
 
 void MainFrame::OnExit(wxCommandEvent&)
@@ -206,7 +216,20 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
         }
         tasks.insert(tasks.begin(),
         Task(name.ToStdString(), description.ToStdString()));
-        UpdateTaskList();
+        
+        std::vector<std::string> taskNames;
+        wxArrayInt index;
+        int checkedItemSize = checkboxList->GetCheckedItems(index);
+        for (int i = 0; i < checkedItemSize; i++) {
+            taskNames.emplace_back(tasks.at(index[i] + 1).getName());
+        }
+        checkboxList->Clear();
+        for (auto& task : tasks) {
+            checkboxList->Insert(task.getName(), checkboxList->GetCount());
+            if (std::find(taskNames.begin(), taskNames.end(), task.getName()) != taskNames.end()) {
+            checkboxList->Check(checkboxList->GetCount() - 1, true);
+            }
+        }
         AddFrame->Destroy();
     });
 }
@@ -281,11 +304,13 @@ void MainFrame::OnArrowUPKey()
 void MainFrame::OnArrowDOWNKey()
 {
     wxMessageBox("DOWN Key pressed");
+    UpdateTaskList();
 }
 
 void MainFrame::OnEnterKey()
 {
     wxMessageBox("Enter Key pressed");
+    UpdateTaskList();
 }
 
 //
