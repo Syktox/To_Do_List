@@ -1,5 +1,6 @@
 module;
 
+#include <iostream>
 #include <vector>
 #include <wx/wx.h>
 #include <wx/icon.h>
@@ -151,6 +152,8 @@ void MainFrame::LoadJSONFile()
 
 void MainFrame::UpdateTaskList()
 {
+   // todo soll die ausgewaehlten elemente behalten 
+   
     checkboxList->Clear();
     for (auto& task : tasks)
     {
@@ -265,6 +268,14 @@ void MainFrame::OnDeleteKey()
 void MainFrame::OnArrowUPKey()
 {
     wxMessageBox("UP Key pressed");
+    int index = checkboxList->GetSelection();
+    if (wxNOT_FOUND == index)
+    {
+        wxLogWarning("No element selected to move");
+        return;
+    }
+    
+    UpdateTaskList();
 }
 
 void MainFrame::OnArrowDOWNKey()
