@@ -21,18 +21,25 @@ private:
     wxCheckListBox* checkboxList;
     wxButton* deleteButton;
     wxButton* addButton;
+    wxButton* finishButton;
+
     
     void AddControls();
     void BindEventHandlers();
+    void LoadJSONFile();
+    void UpdateTaskList();
+
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
-    void OnAddMenuButtonClicked(wxCommandEvent& evt);
-    void OnDeleteMenuButtonClicked(wxCommandEvent& evt);
+
+    void MenuAddTodoList(wxCommandEvent& evt);
+    void MenuDeleteTodoList(wxCommandEvent& evt);
+    void MenuClearTaskList(wxCommandEvent& evt);
+    
     void CreateTaskButton(wxCommandEvent& evt);
     void DeleteTaskButton(wxCommandEvent& evt);
-    void UpdateTaskList();
-    void LoadJSONFile();
-    void ClearTaskList(wxCommandEvent& evt);
+    void FinishTaskButton(wxCommandEvent& evt);
+    
     void OnListKeyDown(wxKeyEvent& evt);
     void OnArrowUPKey();
     void OnDeleteKey();
@@ -89,9 +96,9 @@ void MainFrame::AddControls()
 {
     wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
     SetIcon(appIcon);
-    SetSize(wxSize(300, 400));
-    MainFrame::SetMinSize(wxSize(300, 400));
-    MainFrame::SetMaxSize(wxSize(300, 400));
+    SetSize(wxSize(300, 450));
+    MainFrame::SetMinSize(wxSize(300, 450));
+    MainFrame::SetMaxSize(wxSize(300, 450));
     MainFrame::SetBackgroundColour(*wxWHITE);
     CenterOnScreen();
     
@@ -116,21 +123,39 @@ void MainFrame::AddControls()
                         wxPoint(10,10), wxSize(120, 35));
     deleteButton = new wxButton(mainPanel, wxID_ANY, wxT("Delete"),
                         wxPoint(150,10), wxSize(120, 35));
+    finishButton = new wxButton(mainPanel, wxID_ANY, wxT("Finish"),
+                            wxPoint(10, 340), wxSize(260, 35));
     checkboxList = new wxCheckListBox(mainPanel, wxID_ANY,
                         wxPoint(10,55), wxSize(260,270), 0, nullptr, wxWANTS_CHARS);
+    
 }
 
 void MainFrame::BindEventHandlers()
 {
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
-    Bind(wxEVT_MENU, &MainFrame::OnAddMenuButtonClicked, this, ADD_TODOLIST_ID);
-    Bind(wxEVT_MENU, &MainFrame::OnDeleteMenuButtonClicked, this, DELETE_TODOLIST_ID);
-    Bind(wxEVT_MENU, &MainFrame::ClearTaskList, this, CLEAR_TODOLIST_ID);
+    Bind(wxEVT_MENU, &MainFrame::MenuAddTodoList, this, ADD_TODOLIST_ID);
+    Bind(wxEVT_MENU, &MainFrame::MenuDeleteTodoList, this, DELETE_TODOLIST_ID);
+    Bind(wxEVT_MENU, &MainFrame::MenuClearTaskList, this, CLEAR_TODOLIST_ID);
     
     addButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     deleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
+    finishButton->Bind(wxEVT_BUTTON, &MainFrame::FinishTaskButton, this);
     checkboxList->Bind(wxEVT_KEY_DOWN, &MainFrame::OnListKeyDown, this);
+}
+
+void MainFrame::LoadJSONFile()
+{
+    
+}
+
+void MainFrame::UpdateTaskList()
+{
+    checkboxList->Clear();
+    for (auto& task : tasks)
+    {
+        checkboxList->Insert(task.getName(), checkboxList->GetCount());
+    }
 }
 
 void MainFrame::OnExit(wxCommandEvent&)
@@ -145,24 +170,28 @@ void MainFrame::OnAbout(wxCommandEvent&)
                  "Author Message", wxOK | wxICON_INFORMATION);
 }
 
-void MainFrame::OnAddMenuButtonClicked(wxCommandEvent& event)
+void MainFrame::MenuAddTodoList(wxCommandEvent&)
 {
-    event.Skip();
     wxMessageBox("A new Todo List was created");
     TodoList tdl = TodoList();
 }
 
-void MainFrame::OnDeleteMenuButtonClicked(wxCommandEvent& event)
+void MainFrame::MenuDeleteTodoList(wxCommandEvent&)
 {
-    event.Skip();
     wxMessageBox("Deleted a todolist");
+}
+
+void MainFrame::MenuClearTaskList(wxCommandEvent&)
+{
+    tasks.clear();
+    UpdateTaskList();
 }
 
 void MainFrame::CreateTaskButton(wxCommandEvent&)
 {
     CreateTaskWindow* AddFrame = new CreateTaskWindow();
     AddFrame->CenterOnParent();
-    AddFrame->Show(true);   // fehler darunter
+    AddFrame->Show(true);
     AddFrame->Bind(wxEVT_CLOSE_WINDOW, [this, AddFrame](wxCloseEvent&)
     {
         wxString name = AddFrame->GetTaskName();
@@ -197,24 +226,9 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)
     UpdateTaskList();
 }
 
-void MainFrame::UpdateTaskList()
+void MainFrame::FinishTaskButton(wxCommandEvent&)
 {
-    checkboxList->Clear();
-    for (auto& task : tasks)
-    {
-        checkboxList->Insert(task.getName(), checkboxList->GetCount());
-    }
-}
-
-void MainFrame::LoadJSONFile()
-{
-    
-}
-
-void MainFrame::ClearTaskList(wxCommandEvent&)
-{
-    tasks.clear();
-    UpdateTaskList();
+    wxMessageBox("Finished Task");
 }
 
 void MainFrame::OnListKeyDown(wxKeyEvent& evt)
