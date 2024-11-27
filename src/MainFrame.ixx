@@ -5,6 +5,7 @@ module;
 #include <vector>
 #include <wx/wx.h>
 #include <wx/icon.h>
+#include <nlohmann/json.hpp>
 
 export module MainFrame;
 
@@ -62,9 +63,13 @@ private:
     wxButton* quitButton;
     wxString taskNameString;
     wxString taskDescriptionString;
+    wxCommandEvent dummyCommandEvent;
     
     void QuitButtonClicked(wxCommandEvent& evt);
     void CreateButtonClicked(wxCommandEvent& evt);
+    void OnListKeyDown(wxKeyEvent& evt);
+    void OnEnterKey();
+    void OnEscapeKey();
 
 public:
     CreateTaskWindow();
@@ -159,22 +164,28 @@ void MainFrame::LoadJSONFile()
 
 void MainFrame::UpdateTaskList()
 {
+    int correction = 0;
+    if (tasks.size() > checkboxList->GetCount()) {
+        correction = 1;
+    }
     std::vector<std::string> taskNames;
     wxArrayInt index;
     int checkedItemSize = checkboxList->GetCheckedItems(index);
-    for (int i = 0; i < checkedItemSize; i++) {
-        taskNames.emplace_back(tasks.at(index[i]).getName());
+
+    std::cout << checkboxList->GetCount() << std::endl;
+    
+    for (int i = 0; i < checkedItemSize && tasks.size() >= checkboxList->GetCount(); i++) {
+        taskNames.emplace_back(tasks.at(index[i] + correction).getName());
     }
     checkboxList->Clear();
     for (auto& task : tasks)
     {
         checkboxList->Insert(task.getName(), checkboxList->GetCount());
-        if (std::find(taskNames.begin(), taskNames.end(), task.getName()) != taskNames.end())
+        if (std::ranges::find(taskNames.begin(), taskNames.end(), task.getName()) != taskNames.end() && tasks.size() >= checkboxList->GetCount())
         {
             checkboxList->Check(checkboxList->GetCount() - 1, true);
         }
     }
-    
 }
 
 void MainFrame::OnExit(wxCommandEvent&)
@@ -228,19 +239,7 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
         }
         tasks.insert(tasks.begin(),
         Task(name.ToStdString(), description.ToStdString()));
-        std::vector<std::string> taskNames;
-        wxArrayInt index;
-        int checkedItemSize = checkboxList->GetCheckedItems(index);
-        for (int i = 0; i < checkedItemSize; i++) {
-            taskNames.emplace_back(tasks.at(index[i] + 1).getName());
-        }
-        checkboxList->Clear();
-        for (auto& task : tasks) {
-            checkboxList->Insert(task.getName(), checkboxList->GetCount());
-            if (std::find(taskNames.begin(), taskNames.end(), task.getName()) != taskNames.end()) {
-            checkboxList->Check(checkboxList->GetCount() - 1, true);
-            }
-        }
+        UpdateTaskList();
         AddFrame->Destroy();
     });
 }
@@ -260,8 +259,7 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)
             wxLogWarning("Can't delete element", i);
         }
     }
-    checkboxList->Clear();
-    for (auto& task : tasks) checkboxList->Insert(task.getName(), checkboxList->GetCount());
+    UpdateTaskList();
 }
 
 void MainFrame::FinishTaskButton(wxCommandEvent&)
@@ -345,15 +343,16 @@ CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task"
     description = new wxStaticText(mainPanel, wxID_ANY, wxT("Task Description"),
                                     wxPoint(20, 120), wxDefaultSize, 0);
     taskName = new wxTextCtrl(mainPanel, wxID_ANY, "",
-                                    wxPoint(20, 50), wxSize(345, 25));
+                                    wxPoint(20, 50), wxSize(345, 25), wxTE_PROCESS_ENTER);
     taskDescription = new wxTextCtrl(mainPanel, wxID_ANY, "",
-                                    wxPoint(20, 150), wxSize(345, 90));
+                                    wxPoint(20, 150), wxSize(345, 90), wxTE_PROCESS_ENTER);
     createButton = new wxButton(mainPanel, wxID_ANY, wxT("Create Task"),
                                     wxPoint(225, 275), wxSize(100, 50));
     quitButton = new wxButton(mainPanel, wxID_ANY, wxT("Quit"),
                                     wxPoint(50, 275), wxSize(100, 50));
     quitButton->Bind(wxEVT_BUTTON, &CreateTaskWindow::QuitButtonClicked, this);
     createButton->Bind(wxEVT_BUTTON, &CreateTaskWindow::CreateButtonClicked, this);
+    
 }
 
 void CreateTaskWindow::QuitButtonClicked(wxCommandEvent&)
@@ -382,3 +381,26 @@ wxString CreateTaskWindow::GetTaskDescription()
 {
     return taskDescriptionString;
 }
+
+void CreateTaskWindow::OnListKeyDown(wxKeyEvent& evt)
+{
+    switch (evt.GetKeyCode())
+    {
+    case wxKEY_NONE:
+        break;
+    default:
+        break;
+    }    
+}
+
+void CreateTaskWindow::OnEnterKey()
+{
+    CreateButtonClicked(dummyCommandEvent);
+}
+
+void CreateTaskWindow::OnEscapeKey()
+{
+    QuitButtonClicked(dummyCommandEvent);
+}
+
+

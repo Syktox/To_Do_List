@@ -7,7 +7,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(wxWidgets CONFIG REQUIRED)
-	
+find_package(nlohmann_json CONFIG REQUIRED)
+
+
 add_executable(Todo_List WIN32 ${SOURCES})
 
 file(GLOB SOURCES 
@@ -39,3 +41,6 @@ target_compile_definitions(Todo_List PRIVATE
     "WIN32_LEAN_AND_MEAN"
     "VC_EXTRALEAN"
     )
+	
+target_link_libraries(Todo_List PRIVATE nlohmann_json::nlohmann_json)
+set(nlohmann-json_IMPLICIT_CONVERSIONS OFF)
