@@ -25,7 +25,7 @@ private:
     wxButton* deleteButton;
     wxButton* addButton;
     wxButton* finishButton;
-    
+    wxCommandEvent dummyEvent;
     
     void AddControls();
     void BindEventHandlers();
@@ -48,6 +48,7 @@ private:
     void OnDeleteKey();
     void OnArrowDOWNKey();
     void OnEnterKey();
+    void OnCKey();
 };
 
 class CreateTaskWindow : public wxFrame
@@ -154,6 +155,10 @@ void MainFrame::BindEventHandlers()
 
 void MainFrame::LoadJSONFile()
 {
+    nlohmann::json file = {
+        {"JSON TEST", "NO DESCRIPTION"},
+        {"JSON TEST2", "No"}
+    };
     
 }
 
@@ -265,28 +270,35 @@ void MainFrame::OnListKeyDown(wxKeyEvent& evt)
     if (checkboxList->GetCheckedItems(indices) > 0)
     {
         switch (evt.GetKeyCode()) {
-        case WXK_BACK:
-            OnDeleteKey();
-            break;
-        case WXK_UP:
-            OnArrowUPKey();
-            break;
-        case WXK_DOWN:
-            OnArrowDOWNKey();
-            break;
-        case WXK_RETURN:
-            OnEnterKey();
+            case WXK_BACK:
+                OnDeleteKey();
+                break;
+            case WXK_UP:
+                OnArrowUPKey();
+                break;
+            case WXK_DOWN:
+                OnArrowDOWNKey();
+                break;
+            case WXK_RETURN:
+                OnEnterKey();
+                break;
+            default:
+                std::cout << evt.GetKeyCode() << std::endl;
+                break;
+        }   
+    } 
+    switch (evt.GetKeyCode())
+    {
+        case 67:
+            OnCKey();
             break;
         default:
-            std::cout << evt.GetKeyCode() << std::endl;
             break;
-        }   
     }
 }
 
 void MainFrame::OnDeleteKey()
 {
-    wxCommandEvent dummyEvent(wxEVT_BUTTON, wxID_ANY);
     DeleteTaskButton(dummyEvent);
 }
 
@@ -311,8 +323,13 @@ void MainFrame::OnArrowDOWNKey()
 
 void MainFrame::OnEnterKey()
 {
-    wxMessageBox("Enter Key pressed");
+    FinishTaskButton(dummyEvent);
     UpdateTaskList();
+}
+
+void MainFrame::OnCKey()
+{
+    CreateTaskButton(dummyEvent);
 }
 
 //
