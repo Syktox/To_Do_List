@@ -17,7 +17,6 @@ export class MainFrame : public wxFrame
 {
 public:
     MainFrame();
-    std::vector<Task> GetTasks();
 
 private:
     wxPanel *mainPanel;
@@ -53,6 +52,11 @@ private:
 
 class CreateTaskWindow : public wxFrame
 {
+public:
+    CreateTaskWindow();
+    wxString GetTaskName();
+    wxString GetTaskDescription();
+    
 private:
     wxTextCtrl* taskName;
     wxTextCtrl* taskDescription;
@@ -70,11 +74,6 @@ private:
     void OnListKeyDown(wxKeyEvent& evt);
     void OnEnterKey();
     void OnEscapeKey();
-
-public:
-    CreateTaskWindow();
-    wxString GetTaskName();
-    wxString GetTaskDescription();
 };
 
 enum
@@ -100,10 +99,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
     UpdateTaskList();
 }
 
-std::vector<Task> MainFrame::GetTasks()
-{
-    return tasks;
-}
 
 void MainFrame::AddControls()
 {
@@ -171,9 +166,6 @@ void MainFrame::UpdateTaskList()
     std::vector<std::string> taskNames;
     wxArrayInt index;
     int checkedItemSize = checkboxList->GetCheckedItems(index);
-
-    std::cout << checkboxList->GetCount() << std::endl;
-    
     for (int i = 0; i < checkedItemSize && tasks.size() >= checkboxList->GetCount(); i++) {
         taskNames.emplace_back(tasks.at(index[i] + correction).getName());
     }
@@ -352,7 +344,7 @@ CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task"
                                     wxPoint(50, 275), wxSize(100, 50));
     quitButton->Bind(wxEVT_BUTTON, &CreateTaskWindow::QuitButtonClicked, this);
     createButton->Bind(wxEVT_BUTTON, &CreateTaskWindow::CreateButtonClicked, this);
-    
+    taskName->Bind(wxEVT_KEY_DOWN, &CreateTaskWindow::OnListKeyDown, this);
 }
 
 void CreateTaskWindow::QuitButtonClicked(wxCommandEvent&)
@@ -386,9 +378,13 @@ void CreateTaskWindow::OnListKeyDown(wxKeyEvent& evt)
 {
     switch (evt.GetKeyCode())
     {
-    case wxKEY_NONE:
+    case WXK_RETURN:
+        OnEnterKey();
         break;
+    case WXK_ESCAPE:
+        OnEscapeKey();
     default:
+        evt.Skip();
         break;
     }    
 }
