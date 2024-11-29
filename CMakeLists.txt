@@ -16,8 +16,8 @@ file(GLOB SOURCES
     "src/*.h"
     "src/*.cpp"
     "src/*.ixx"
-	"resources/*.xpm"
 	"resources/*.ico"
+	"*.rc"
     )
 
 

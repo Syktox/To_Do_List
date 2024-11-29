@@ -4,6 +4,8 @@ module;
 
 export module CreateTaskWindow;
 
+#define IDI_APP_ICON 101
+
 export class CreateTaskWindow : public wxFrame
 {
 public:
@@ -34,8 +36,10 @@ private:
 
 CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task")
 {
-    wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
-    SetIcon(appIcon);
+    wxIcon appIcon;
+    appIcon.LoadFile("IDI_APP_ICON", wxBITMAP_TYPE_ICO_RESOURCE);
+    if (appIcon.IsOk()) { SetIcon(appIcon); }
+    
     CreateTaskWindow::SetBackgroundColour(*wxWHITE);
     SetSize(wxSize(400, 400));
     CreateTaskWindow::SetMinSize(wxSize(400, 400));

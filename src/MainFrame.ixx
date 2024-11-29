@@ -4,11 +4,11 @@ module;
 #include <ostream>
 #include <vector>
 #include <wx/wx.h>
-#include <wx/icon.h>
 #include <nlohmann/json.hpp>
 
 export module MainFrame;
 
+#define IDI_APP_ICON 101
 import std;
 import TodoList;
 import Task;
@@ -70,16 +70,16 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
     tasks.insert(tasks.begin(), Task("Task 3", "No"));
     tasks.insert(tasks.begin(), Task("Task 4", "No"));
     
-    // todo json file einbinden
-    
     UpdateTaskList();
 }
 
 
 void MainFrame::AddControls()
 {
-    wxIcon appIcon("..\\resources\\appIcon.ico", wxBITMAP_TYPE_ICO);
-    SetIcon(appIcon);
+    wxIcon appIcon;
+    appIcon.LoadFile("IDI_APP_ICON", wxBITMAP_TYPE_ICO_RESOURCE);
+    if (appIcon.IsOk()) { SetIcon(appIcon); }
+    
     SetSize(wxSize(300, 450));
     MainFrame::SetMinSize(wxSize(300, 450));
     MainFrame::SetMaxSize(wxSize(300, 450));
@@ -126,15 +126,17 @@ void MainFrame::BindEventHandlers()
     deleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
     finishButton->Bind(wxEVT_BUTTON, &MainFrame::FinishTaskButton, this);
     checkboxList->Bind(wxEVT_KEY_DOWN, &MainFrame::OnListKeyDown, this);
+    checkboxList->SetFocus();
 }
 
 void MainFrame::LoadJSONFile()
 {
+    // working directory herrausfinden
     nlohmann::json file = {
         {"JSON TEST", "NO DESCRIPTION"},
         {"JSON TEST2", "No"}
     };
-    
+    std::cout << file.at("JSON TEST").dump();
 }
 
 void MainFrame::UpdateTaskList()
@@ -258,7 +260,7 @@ void MainFrame::OnListKeyDown(wxKeyEvent& evt)
                 OnEnterKey();
                 break;
             default:
-                std::cout << evt.GetKeyCode() << std::endl;
+                evt.Skip();     // dont know the effects
                 break;
         }   
     } 
