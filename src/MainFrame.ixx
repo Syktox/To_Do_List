@@ -1,6 +1,5 @@
 module;
 
-#include <vector>
 #include <wx/wx.h>
 #include <nlohmann/json.hpp>
 #include <Windows.h>
@@ -8,6 +7,7 @@ module;
 export module MainFrame;
 
 #define IDI_APP_ICON 101
+
 import std;
 import TodoList;
 import Task;
@@ -31,7 +31,6 @@ private:
     void BindEventHandlers();
     void LoadJSONFile();
     void UpdateTaskList();
-    
 
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
@@ -130,9 +129,17 @@ void MainFrame::BindEventHandlers()
 
 void MainFrame::LoadJSONFile()
 {
-    wchar_t path[MAX_PATH];
-    GetModuleFileNameW(nullptr, path, MAX_PATH);
-    std::wcout << path << std::endl;
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+    static auto exe_parent_path = std::filesystem::path(exePath).parent_path();
+    std::filesystem::path dataFolder = exe_parent_path / "data";
+    try {
+        if (!exists(dataFolder)) { create_directory(dataFolder); }
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+
+    
     
     nlohmann::json idk = {
         {"JSON TEST", "NO DESCRIPTION"},
