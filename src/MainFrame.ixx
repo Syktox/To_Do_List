@@ -1,10 +1,9 @@
 module;
 
-#include <iostream>
-#include <ostream>
 #include <vector>
 #include <wx/wx.h>
 #include <nlohmann/json.hpp>
+#include <Windows.h>
 
 export module MainFrame;
 
@@ -32,6 +31,7 @@ private:
     void BindEventHandlers();
     void LoadJSONFile();
     void UpdateTaskList();
+    
 
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
@@ -111,7 +111,6 @@ void MainFrame::AddControls()
                             wxPoint(10, 340), wxSize(260, 35));
     checkboxList = new wxCheckListBox(mainPanel, wxID_ANY,
                         wxPoint(10,55), wxSize(260,270), 0, nullptr, wxWANTS_CHARS);
-    
 }
 
 void MainFrame::BindEventHandlers()
@@ -131,12 +130,15 @@ void MainFrame::BindEventHandlers()
 
 void MainFrame::LoadJSONFile()
 {
-    // working directory herrausfinden
-    nlohmann::json file = {
+    wchar_t path[MAX_PATH];
+    GetModuleFileNameW(nullptr, path, MAX_PATH);
+    std::wcout << path << std::endl;
+    
+    nlohmann::json idk = {
         {"JSON TEST", "NO DESCRIPTION"},
         {"JSON TEST2", "No"}
     };
-    std::cout << file.at("JSON TEST").dump();
+
 }
 
 void MainFrame::UpdateTaskList()
