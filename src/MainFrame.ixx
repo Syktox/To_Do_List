@@ -3,6 +3,7 @@ module;
 #include <wx/wx.h>
 #include <nlohmann/json.hpp>
 #include <Windows.h>
+#include <fstream>
 
 export module MainFrame;
 
@@ -132,6 +133,8 @@ void MainFrame::LoadJSONFile()
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(nullptr, exePath, MAX_PATH);
     static auto exe_parent_path = std::filesystem::path(exePath).parent_path();
+
+    // Create Folder if not existing
     std::filesystem::path dataFolder = exe_parent_path / "data";
     try {
         if (!exists(dataFolder)) { create_directory(dataFolder); }
@@ -139,12 +142,22 @@ void MainFrame::LoadJSONFile()
         std::cerr << "Error: " << e.what() << std::endl;
     }
 
+    // create JSON Files
+    std::ofstream jsonFile(dataFolder / "tasks.json");
+    std::ofstream finishedDataFile(dataFolder / "finished.json");
+
+    // nlohmann::json jsonData = nlohmann::json::parse(jsonFile);
+
+    if (jsonFile.is_open())
+    {
+        jsonFile << "{";
+        jsonFile.close();    
+    } else
+    {
+        std::cerr << "Failed to open file " << dataFolder / "tasks.json" << std::endl;
+    }
     
     
-    nlohmann::json idk = {
-        {"JSON TEST", "NO DESCRIPTION"},
-        {"JSON TEST2", "No"}
-    };
 
 }
 
