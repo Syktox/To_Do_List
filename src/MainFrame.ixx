@@ -30,11 +30,13 @@ private:
     
     void AddControls();
     void BindEventHandlers();
+    std::filesystem::path GetDataPath();
     bool JSONFilesExists();
     void LoadJSONFile();
     void CreateJSONFile();
+    void WriteTaskToJSON(Task task);
     void UpdateTaskList();
-
+    
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
 
@@ -80,7 +82,6 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
     
     UpdateTaskList();
 }
-
 
 void MainFrame::AddControls()
 {
@@ -136,15 +137,20 @@ void MainFrame::BindEventHandlers()
     checkboxList->SetFocus();
 }
 
-bool MainFrame::JSONFilesExists()
+std::filesystem::path MainFrame::GetDataPath()
 {
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(nullptr, exePath, MAX_PATH);
     static auto exe_parent_path = std::filesystem::path(exePath).parent_path();
-    
-    if (std::filesystem::exists(exe_parent_path / "data" / "tasks.json") &&
-        std::filesystem::exists(exe_parent_path / "data") &&
-        std::filesystem::exists(exe_parent_path / "data" / "finished.json")) {
+    return exe_parent_path / "data";
+}
+
+bool MainFrame::JSONFilesExists()
+{
+    std::filesystem::path dataPath = GetDataPath();
+    if (std::filesystem::exists(dataPath) &&
+        std::filesystem::exists(dataPath / "tasks.json") &&
+        std::filesystem::exists(dataPath / "finished.json")) {
         return true;
     }
     return false;
@@ -152,35 +158,31 @@ bool MainFrame::JSONFilesExists()
 
 void MainFrame::LoadJSONFile()
 {
-    wchar_t exePath[MAX_PATH];
-    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-    static auto exe_parent_path = std::filesystem::path(exePath).parent_path();
-    std::filesystem::path dataFolder = exe_parent_path / "data";
-    std::ifstream jsonDataFile{dataFolder / "tasks.json"};
-    std::ifstream jsonFinishedDataFile{dataFolder / "finished.json"};
+    std::filesystem::path dataPath = GetDataPath();
+    std::ifstream jsonDataFile{dataPath / "tasks.json"};
+    std::ifstream jsonFinishedDataFile{dataPath / "finished.json"};
     
-    std::cout << "loading tasks" << std::endl;
+    std::cout << "Loaded tasks" << std::endl;
 
     // todo read json file 
     
 }
 
 void MainFrame::CreateJSONFile()
-{
-    wchar_t exePath[MAX_PATH];
-    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-    static auto exe_parent_path = std::filesystem::path(exePath).parent_path();
-    
-    std::filesystem::path dataFolder = exe_parent_path / "data";
+{    
+    std::filesystem::path dataFolder = GetDataPath();
     try {
         if (!exists(dataFolder)) { create_directory(dataFolder); }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
-    
     std::ofstream jsonDataFile(dataFolder / "tasks.json");
     std::ofstream jsonFinishedDataFile(dataFolder / "finished.json");
-   
+}
+
+void MainFrame::WriteTaskToJSON(Task task)
+{
+    std::cout << "Wrote task to JSON File: " << task.getName()  << std::endl;
 }
 
 void MainFrame::UpdateTaskList()
@@ -255,8 +257,9 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
             AddFrame->Destroy();
             return;
         }
-        tasks.insert(tasks.begin(),
-        Task(name.ToStdString(), description.ToStdString()));
+        Task task = Task(name.ToStdString(), description.ToStdString());
+        tasks.insert(tasks.begin(), task);
+        WriteTaskToJSON(task);
         UpdateTaskList();
         AddFrame->Destroy();
     });
