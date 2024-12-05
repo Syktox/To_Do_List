@@ -20,14 +20,14 @@ public:
     MainFrame();
 
 private:
-    wxPanel *mainPanel;
+    wxPanel* mainPanel;
     std::vector<Task> tasks;
     wxCheckListBox* checkboxList;
     wxButton* deleteButton;
     wxButton* addButton;
     wxButton* finishButton;
     wxCommandEvent dummyEvent;
-    
+
     void AddControls();
     void BindEventHandlers();
     std::filesystem::path GetDataPath();
@@ -36,18 +36,18 @@ private:
     void CreateJSONFile();
     void WriteTaskToJSON(Task task);
     void UpdateTaskList();
-    
+
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
 
     void MenuAddTodoList(wxCommandEvent& evt);
     void MenuDeleteTodoList(wxCommandEvent& evt);
     void MenuClearTaskList(wxCommandEvent& evt);
-    
+
     void CreateTaskButton(wxCommandEvent& evt);
     void DeleteTaskButton(wxCommandEvent& evt);
     void FinishTaskButton(wxCommandEvent& evt);
-    
+
     void OnListKeyDown(wxKeyEvent& evt);
     void OnArrowUPKey();
     void OnDeleteKey();
@@ -64,13 +64,14 @@ enum
 };
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
-{    
+{
     AddControls();
-    BindEventHandlers();     
+    BindEventHandlers();
     if (JSONFilesExists())
     {
         LoadJSONFile();
-    } else
+    }
+    else
     {
         CreateJSONFile();
     }
@@ -79,7 +80,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
     tasks.insert(tasks.begin(), Task("Task 2", "Nod"));
     tasks.insert(tasks.begin(), Task("Task 3", "No"));
     tasks.insert(tasks.begin(), Task("Task 4", "No"));
-    
+
     UpdateTaskList();
 }
 
@@ -88,38 +89,38 @@ void MainFrame::AddControls()
     wxIcon appIcon;
     appIcon.LoadFile("IDI_APP_ICON", wxBITMAP_TYPE_ICO_RESOURCE);
     if (appIcon.IsOk()) { SetIcon(appIcon); }
-    
+
     SetSize(wxSize(300, 450));
     MainFrame::SetMinSize(wxSize(300, 450));
     MainFrame::SetMaxSize(wxSize(300, 450));
     MainFrame::SetBackgroundColour(*wxWHITE);
     CenterOnScreen();
-    
-    wxMenu *menuFile = new wxMenu;
+
+    wxMenu* menuFile = new wxMenu;
     menuFile->Append(ADD_TODOLIST_ID, "Add a new Todo List");
     menuFile->Append(DELETE_TODOLIST_ID, "Delete this Todo List");
     menuFile->Append(CLEAR_TODOLIST_ID, "Clear this Todo List");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
-    wxMenu *vieTodoListMenu = new wxMenu;
-    wxMenu *menuHelp = new wxMenu;
+    wxMenu* vieTodoListMenu = new wxMenu;
+    wxMenu* menuHelp = new wxMenu;
     menuHelp->Append(wxID_ABOUT);
-    wxMenuBar *menuBar = new wxMenuBar;
-    
+    wxMenuBar* menuBar = new wxMenuBar;
+
     menuBar->Append(menuFile, "&File");
     menuBar->Append(vieTodoListMenu, "&To Do Lists");
     menuBar->Append(menuHelp, "&Help");
-    MainFrame::SetMenuBar( menuBar );
-    
+    MainFrame::SetMenuBar(menuBar);
+
     mainPanel = new wxPanel(this, wxID_ANY);
     addButton = new wxButton(mainPanel, wxID_ANY, wxT("Add"),
-                        wxPoint(10,10), wxSize(120, 35));
+                             wxPoint(10, 10), wxSize(120, 35));
     deleteButton = new wxButton(mainPanel, wxID_ANY, wxT("Delete"),
-                        wxPoint(150,10), wxSize(120, 35));
+                                wxPoint(150, 10), wxSize(120, 35));
     finishButton = new wxButton(mainPanel, wxID_ANY, wxT("Finish"),
-                            wxPoint(10, 340), wxSize(260, 35));
+                                wxPoint(10, 340), wxSize(260, 35));
     checkboxList = new wxCheckListBox(mainPanel, wxID_ANY,
-                        wxPoint(10,55), wxSize(260,270), 0, nullptr, wxWANTS_CHARS);
+                                      wxPoint(10, 55), wxSize(260, 270), 0, nullptr, wxWANTS_CHARS);
 }
 
 void MainFrame::BindEventHandlers()
@@ -129,7 +130,7 @@ void MainFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MainFrame::MenuAddTodoList, this, ADD_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::MenuDeleteTodoList, this, DELETE_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::MenuClearTaskList, this, CLEAR_TODOLIST_ID);
-    
+
     addButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     deleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
     finishButton->Bind(wxEVT_BUTTON, &MainFrame::FinishTaskButton, this);
@@ -150,7 +151,8 @@ bool MainFrame::JSONFilesExists()
     std::filesystem::path dataPath = GetDataPath();
     if (std::filesystem::exists(dataPath) &&
         std::filesystem::exists(dataPath / "tasks.json") &&
-        std::filesystem::exists(dataPath / "finished.json")) {
+        std::filesystem::exists(dataPath / "finished.json"))
+    {
         return true;
     }
     return false;
@@ -161,19 +163,22 @@ void MainFrame::LoadJSONFile()
     std::filesystem::path dataPath = GetDataPath();
     std::ifstream jsonDataFile{dataPath / "tasks.json"};
     std::ifstream jsonFinishedDataFile{dataPath / "finished.json"};
-    
-    std::cout << "Loaded tasks" << std::endl;
 
-    // todo read json file 
-    
+    // todo read json file
+
+
+    std::cout << "Loaded tasks" << std::endl;
 }
 
 void MainFrame::CreateJSONFile()
-{    
+{
     std::filesystem::path dataFolder = GetDataPath();
-    try {
+    try
+    {
         if (!exists(dataFolder)) { create_directory(dataFolder); }
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e)
+    {
         std::cerr << "Error: " << e.what() << std::endl;
     }
     std::ofstream jsonDataFile(dataFolder / "tasks.json");
@@ -182,26 +187,43 @@ void MainFrame::CreateJSONFile()
 
 void MainFrame::WriteTaskToJSON(Task task)
 {
-    std::cout << "Wrote task to JSON File: " << task.getName()  << std::endl;
+    std::filesystem::path outputFile = GetDataPath() / "tasks.json";
+    std::ofstream output(outputFile, std::ios::app);
+    std::cout << "Wrote task to JSON File: " << task.getName() << std::endl;
+    
+    nlohmann::json jsonObject = nlohmann::json::array();
+    jsonObject.push_back(task.getName());
+    jsonObject.push_back(task.getDescription());
+    jsonObject.push_back(task.getCreated());
+    
+
+    if (output.is_open())
+    {
+        output << std::setw(4) << jsonObject << std::endl;
+        output.close();
+    }
 }
 
 void MainFrame::UpdateTaskList()
 {
     int correction = 0;
-    if (tasks.size() > checkboxList->GetCount()) {
+    if (tasks.size() > checkboxList->GetCount())
+    {
         correction = 1;
     }
     std::vector<std::string> taskNames;
     wxArrayInt index;
     int checkedItemSize = checkboxList->GetCheckedItems(index);
-    for (int i = 0; i < checkedItemSize && tasks.size() >= checkboxList->GetCount(); i++) {
+    for (int i = 0; i < checkedItemSize && tasks.size() >= checkboxList->GetCount(); i++)
+    {
         taskNames.emplace_back(tasks.at(index[i] + correction).getName());
     }
     checkboxList->Clear();
     for (auto& task : tasks)
     {
         checkboxList->Insert(task.getName(), checkboxList->GetCount());
-        if (std::ranges::find(taskNames.begin(), taskNames.end(), task.getName()) != taskNames.end() && tasks.size() >= checkboxList->GetCount())
+        if (std::ranges::find(taskNames.begin(), taskNames.end(), task.getName()) != taskNames.end() && tasks.size() >=
+            checkboxList->GetCount())
         {
             checkboxList->Check(checkboxList->GetCount() - 1, true);
         }
@@ -212,7 +234,7 @@ void MainFrame::OnExit(wxCommandEvent&)
 {
     Close(true);
 }
- 
+
 void MainFrame::OnAbout(wxCommandEvent&)
 {
     wxMessageBox("Written by Markus Kammerstetter\n"
@@ -252,7 +274,8 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
             return;
         }
 
-        if (std::ranges::any_of(tasks, [&name, &description](auto& task){ return task.getName() == name; })) {
+        if (std::ranges::any_of(tasks, [&name, &description](auto& task) { return task.getName() == name; }))
+        {
             wxMessageBox("Task already exists");
             AddFrame->Destroy();
             return;
@@ -275,7 +298,8 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)
         if (i < tasks.size())
         {
             tasks.erase(tasks.begin() + i);
-        } else
+        }
+        else
         {
             wxLogWarning("Can't delete element", i);
         }
@@ -293,31 +317,32 @@ void MainFrame::OnListKeyDown(wxKeyEvent& evt)
     wxArrayInt indices;
     if (checkboxList->GetCheckedItems(indices) > 0)
     {
-        switch (evt.GetKeyCode()) {
-            case WXK_BACK:
-                OnDeleteKey();
-                break;
-            case WXK_UP:
-                OnArrowUPKey();
-                break;
-            case WXK_DOWN:
-                OnArrowDOWNKey();
-                break;
-            case WXK_RETURN:
-                OnEnterKey();
-                break;
-            default:
-                evt.Skip();     // dont know the effects
-                break;
-        }   
-    } 
-    switch (evt.GetKeyCode())
-    {
-        case 67:
-            OnCKey();
+        switch (evt.GetKeyCode())
+        {
+        case WXK_BACK:
+            OnDeleteKey();
+            break;
+        case WXK_UP:
+            OnArrowUPKey();
+            break;
+        case WXK_DOWN:
+            OnArrowDOWNKey();
+            break;
+        case WXK_RETURN:
+            OnEnterKey();
             break;
         default:
+            evt.Skip(); // dont know the effects
             break;
+        }
+    }
+    switch (evt.GetKeyCode())
+    {
+    case 67:
+        OnCKey();
+        break;
+    default:
+        break;
     }
 }
 
@@ -335,7 +360,7 @@ void MainFrame::OnArrowUPKey()
         wxLogWarning("No element selected to move");
         return;
     }
-    
+
     UpdateTaskList();
 }
 

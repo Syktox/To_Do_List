@@ -61,6 +61,7 @@ CreateTaskWindow::CreateTaskWindow() : wxFrame(nullptr, wxID_ANY, "Add new Task"
     quitButton->Bind(wxEVT_BUTTON, &CreateTaskWindow::QuitButtonClicked, this);
     createButton->Bind(wxEVT_BUTTON, &CreateTaskWindow::CreateButtonClicked, this);
     taskName->Bind(wxEVT_KEY_DOWN, &CreateTaskWindow::OnListKeyDown, this);
+    taskDescription->Bind(wxEVT_KEY_DOWN, &CreateTaskWindow::OnListKeyDown, this);
 }
 
 void CreateTaskWindow::QuitButtonClicked(wxCommandEvent&)
