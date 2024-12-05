@@ -30,7 +30,9 @@ private:
     
     void AddControls();
     void BindEventHandlers();
+    bool JSONFilesExists();
     void LoadJSONFile();
+    void CreateJSONFile();
     void UpdateTaskList();
 
     void OnExit(wxCommandEvent& evt);
@@ -62,8 +64,14 @@ enum
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
 {    
     AddControls();
-    BindEventHandlers();
-    LoadJSONFile();
+    BindEventHandlers();     
+    if (JSONFilesExists())
+    {
+        LoadJSONFile();
+    } else
+    {
+        CreateJSONFile();
+    }
 
     tasks.insert(tasks.begin(), Task("Task 1", "No"));
     tasks.insert(tasks.begin(), Task("Task 2", "Nod"));
@@ -128,37 +136,51 @@ void MainFrame::BindEventHandlers()
     checkboxList->SetFocus();
 }
 
+bool MainFrame::JSONFilesExists()
+{
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+    static auto exe_parent_path = std::filesystem::path(exePath).parent_path();
+    
+    if (std::filesystem::exists(exe_parent_path / "data" / "tasks.json") &&
+        std::filesystem::exists(exe_parent_path / "data") &&
+        std::filesystem::exists(exe_parent_path / "data" / "finished.json")) {
+        return true;
+    }
+    return false;
+}
+
 void MainFrame::LoadJSONFile()
 {
     wchar_t exePath[MAX_PATH];
     GetModuleFileNameW(nullptr, exePath, MAX_PATH);
     static auto exe_parent_path = std::filesystem::path(exePath).parent_path();
+    std::filesystem::path dataFolder = exe_parent_path / "data";
+    std::ifstream jsonDataFile{dataFolder / "tasks.json"};
+    std::ifstream jsonFinishedDataFile{dataFolder / "finished.json"};
+    
+    std::cout << "loading tasks" << std::endl;
 
-    // Create Folder if not existing
+    // todo read json file 
+    
+}
+
+void MainFrame::CreateJSONFile()
+{
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+    static auto exe_parent_path = std::filesystem::path(exePath).parent_path();
+    
     std::filesystem::path dataFolder = exe_parent_path / "data";
     try {
         if (!exists(dataFolder)) { create_directory(dataFolder); }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
-
-    // create JSON Files
-    std::ofstream jsonFile(dataFolder / "tasks.json");
-    std::ofstream finishedDataFile(dataFolder / "finished.json");
-
-    // nlohmann::json jsonData = nlohmann::json::parse(jsonFile);
-
-    if (jsonFile.is_open())
-    {
-        jsonFile << "{";
-        jsonFile.close();    
-    } else
-    {
-        std::cerr << "Failed to open file " << dataFolder / "tasks.json" << std::endl;
-    }
     
-    
-
+    std::ofstream jsonDataFile(dataFolder / "tasks.json");
+    std::ofstream jsonFinishedDataFile(dataFolder / "finished.json");
+   
 }
 
 void MainFrame::UpdateTaskList()
