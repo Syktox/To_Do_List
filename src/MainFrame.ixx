@@ -130,12 +130,12 @@ void MainFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MainFrame::MenuAddTodoList, this, ADD_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::MenuDeleteTodoList, this, DELETE_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::MenuClearTaskList, this, CLEAR_TODOLIST_ID);
-
+    Bind(wxEVT_CHAR_HOOK, &MainFrame::OnListKeyDown, this, wxID_ANY);
+ 
     addButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     deleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
     finishButton->Bind(wxEVT_BUTTON, &MainFrame::FinishTaskButton, this);
     checkboxList->Bind(wxEVT_KEY_DOWN, &MainFrame::OnListKeyDown, this);
-    checkboxList->SetFocus();
 }
 
 std::filesystem::path MainFrame::GetDataPath()
@@ -190,7 +190,8 @@ void MainFrame::WriteTaskToJSON(Task task)
     std::filesystem::path outputFile = GetDataPath() / "tasks.json";
     std::ofstream output(outputFile, std::ios::app);
     std::cout << "Wrote task to JSON File: " << task.getName() << std::endl;
-    
+
+    // help
     nlohmann::json jsonObject = nlohmann::json::array();
     jsonObject.push_back(task.getName());
     jsonObject.push_back(task.getDescription());
