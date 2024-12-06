@@ -27,7 +27,7 @@ private:
     wxButton* addButton;
     wxButton* finishButton;
     wxCommandEvent dummyEvent;
-
+    
     void AddControls();
     void BindEventHandlers();
     std::filesystem::path GetDataPath();
@@ -191,12 +191,14 @@ void MainFrame::WriteTaskToJSON(Task task)
     std::ofstream output(outputFile, std::ios::app);
     std::cout << "Wrote task to JSON File: " << task.getName() << std::endl;
 
-    // help
-    nlohmann::json jsonObject = nlohmann::json::array();
-    jsonObject.push_back(task.getName());
-    jsonObject.push_back(task.getDescription());
-    jsonObject.push_back(task.getCreated());
     
+    nlohmann::json jsonObject = {
+        {"id", tasks.size()},
+        {"name", task.getName()},
+        {"description", task.getDescription()},
+        {"created", task.getCreated()},
+    };
+
 
     if (output.is_open())
     {
