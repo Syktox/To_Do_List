@@ -32,7 +32,7 @@ private:
     void BindEventHandlers();
     std::filesystem::path GetDataPath();
     bool JSONFilesExists();
-    void LoadJSONFile();
+    nlohmann::json LoadJSONFile();
     void CreateJSONFile();
     void WriteTaskToJSON(Task task);
     void UpdateTaskList();
@@ -67,15 +67,18 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
 {
     AddControls();
     BindEventHandlers();
+    nlohmann::json jsonArray;
     if (JSONFilesExists())
     {
-        LoadJSONFile();
+        jsonArray = LoadJSONFile();
+        // to do insert in checkbox
+        std::cout << jsonArray.dump(4) << std::endl;
     }
     else
     {
         CreateJSONFile();
     }
-
+       
     tasks.insert(tasks.begin(), Task("Task 1", "No"));
     tasks.insert(tasks.begin(), Task("Task 2", "Nod"));
     tasks.insert(tasks.begin(), Task("Task 3", "No"));
@@ -158,16 +161,26 @@ bool MainFrame::JSONFilesExists()
     return false;
 }
 
-void MainFrame::LoadJSONFile()
+nlohmann::json MainFrame::LoadJSONFile()
 {
     std::filesystem::path dataPath = GetDataPath();
-    std::ifstream jsonDataFile{dataPath / "tasks.json"};
+    std::ifstream inputFile{dataPath / "tasks.json"};
     std::ifstream jsonFinishedDataFile{dataPath / "finished.json"};
-
-    // todo read json file
-
-
-    std::cout << "Loaded tasks" << std::endl;
+    
+    if (inputFile.is_open() && inputFile.peek() != std::ifstream::traits_type::eof()) {
+        try
+        {
+            nlohmann::json data;
+            inputFile >> data;
+            inputFile.close();
+            return data;
+        } catch (std::ifstream::failure& e)
+        {
+            std::cout << e.what() << std::endl;
+        }
+    }
+    
+    return nlohmann::json::array();
 }
 
 void MainFrame::CreateJSONFile()
@@ -191,19 +204,22 @@ void MainFrame::WriteTaskToJSON(Task task)
     std::ofstream output(outputFile, std::ios::app);
     std::cout << "Wrote task to JSON File: " << task.getName() << std::endl;
 
-    
-    nlohmann::json jsonObject = {
-        {"id", tasks.size()},
-        {"name", task.getName()},
-        {"description", task.getDescription()},
-        {"created", task.getCreated()},
+    nlohmann::json jsonData = LoadJSONFile();
+    nlohmann::json jsonObj = {
+    {"name", task.getName()},
+    {"description", task.getDescription()},
+    {"created", task.getCreated()}
     };
-
-
+    
+    jsonData.push_back(jsonObj);
+    
     if (output.is_open())
     {
-        output << std::setw(4) << jsonObject << std::endl;
+        output << jsonData.dump(4);
         output.close();
+    } else
+    {
+        std::cerr << "Error: " << outputFile.string() << std::endl;
     }
 }
 
