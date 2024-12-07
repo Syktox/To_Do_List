@@ -162,26 +162,18 @@ bool MainFrame::JSONFilesExists()
     return false;
 }
 
-nlohmann::json MainFrame::LoadJSONFile()
+nlohmann::json MainFrame::LoadJSONFile() // no work
 {
     std::filesystem::path dataPath = GetDataPath();
     std::ifstream inputFile{dataPath / "tasks.json"};
     std::ifstream jsonFinishedDataFile{dataPath / "finished.json"};
-    
-    if (inputFile.is_open() && inputFile.peek() != std::ifstream::traits_type::eof()) {
-        try
-        {
-            nlohmann::json data;
-            inputFile >> data;
-            inputFile.close();
-            return data;
-        } catch (std::ifstream::failure& e)
-        {
-            std::cout << e.what() << std::endl;
-        }
+
+    if (inputFile.peek() == std::ifstream::traits_type::eof())
+    {
+        return nlohmann::json::array();
     }
     
-    return nlohmann::json::array();
+    return nlohmann::json::parse(inputFile);
 }
 
 void MainFrame::CreateJSONFile()
@@ -199,20 +191,15 @@ void MainFrame::CreateJSONFile()
     std::ofstream jsonFinishedDataFile(dataFolder / "finished.json");
 }
 
-void MainFrame::WriteTaskToJSON(Task task)
+void MainFrame::WriteTaskToJSON(Task task)  // still to do
 {
     std::filesystem::path outputFile = GetDataPath() / "tasks.json";
-    std::ofstream output(outputFile, std::ios::app);
     std::cout << "Wrote task to JSON File: " << task.getName() << std::endl;
 
     nlohmann::json jsonData = LoadJSONFile();
-    nlohmann::json jsonObj = {
-    {"name", task.getName()},
-    {"description", task.getDescription()},
-    {"created", task.getCreated()}
-    };
-    
-    jsonData.push_back(jsonObj);
+    std::ofstream output(outputFile);
+    nlohmann::json jsonObj = { {"id", tasks.size()}, {"name", task.getName()}, {"description", task.getDescription()}, {"created", task.getCreated()}, {"completed", false}, {"completedAt", task.getCompletedAt()}};
+    jsonData["tasks"].push_back(jsonObj);
     
     if (output.is_open())
     {
