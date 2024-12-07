@@ -67,12 +67,9 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
 {
     AddControls();
     BindEventHandlers();
-    nlohmann::json jsonArray;
-    std::string name;
-    std:: string description;
     if (JSONFilesExists())
     {
-        jsonArray = LoadJSONFile();
+        nlohmann::json jsonArray = LoadJSONFile();
         if (jsonArray.contains("tasks") && jsonArray["tasks"].is_array())
         {
             for (auto json : jsonArray["tasks"]) {
@@ -83,9 +80,7 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
                 tasks.insert(tasks.begin(), task);
             }
         }
-        UpdateTaskList();
-    }
-    else
+    } else
     {
         CreateJSONFile();
     }
