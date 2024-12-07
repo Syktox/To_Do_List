@@ -68,22 +68,28 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
     AddControls();
     BindEventHandlers();
     nlohmann::json jsonArray;
+    std::string name;
+    std:: string description;
     if (JSONFilesExists())
     {
         jsonArray = LoadJSONFile();
-        // to do insert in checkbox
-        std::cout << jsonArray.dump(4) << std::endl;
+        if (jsonArray.contains("tasks") && jsonArray["tasks"].is_array())
+        {
+            for (auto json : jsonArray["tasks"]) {
+                Task task = Task(json["name"], json["description"]);
+                task.setCreated(json["created"]);
+                task.setCompleted(json["completed"]);
+                task.setCompletedAt(json["completedAt"]);
+                tasks.insert(tasks.begin(), task);
+            }
+        }
+        UpdateTaskList();
     }
     else
     {
         CreateJSONFile();
     }
-       
-    tasks.insert(tasks.begin(), Task("Task 1", "No"));
-    tasks.insert(tasks.begin(), Task("Task 2", "Nod"));
-    tasks.insert(tasks.begin(), Task("Task 3", "No"));
-    tasks.insert(tasks.begin(), Task("Task 4", "No"));
-
+    
     UpdateTaskList();
 }
 

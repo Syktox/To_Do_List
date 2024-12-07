@@ -26,6 +26,7 @@ public:
     
     std::string getName();
     std::string getDescription();
+    void setCreated(time_t createdArg);
     bool isCompleted();
     void setCompleted(bool completed);
     std::time_t getCreated();
@@ -93,6 +94,11 @@ std::string Task::getName() {
 
 std::string Task::getDescription() {
     return this->description;
+}
+
+void Task::setCreated(time_t createdArg)
+{
+    this->created = createdArg;
 }
 
 bool Task::isCompleted() {
