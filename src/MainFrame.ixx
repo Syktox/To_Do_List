@@ -262,13 +262,14 @@ void MainFrame::MenuDeleteTodoList(wxCommandEvent&)
     wxMessageBox("Deleted a todolist");
 }
 
-void MainFrame::MenuClearTaskList(wxCommandEvent&)  // no work
+void MainFrame::MenuClearTaskList(wxCommandEvent&)
 {
     tasks.clear();
-    std::filesystem::path dataFolder = GetDataPath();
     nlohmann::json json = LoadJSONFile();
     json["tasks"].clear();
-    
+    std::filesystem::path outputFile = GetDataPath() / "tasks.json";
+    std::ofstream output(outputFile);
+    output << json.dump(4);
     UpdateTaskList();
 }
 
