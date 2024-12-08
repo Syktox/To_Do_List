@@ -170,7 +170,7 @@ nlohmann::json MainFrame::LoadJSONFile() // no work
 
     if (inputFile.peek() == std::ifstream::traits_type::eof())
     {
-        return nlohmann::json::array();
+        return nlohmann::json();
     }
     
     return nlohmann::json::parse(inputFile);
@@ -191,14 +191,16 @@ void MainFrame::CreateJSONFile()
     std::ofstream jsonFinishedDataFile(dataFolder / "finished.json");
 }
 
-void MainFrame::WriteTaskToJSON(Task task)  // still to do
+void MainFrame::WriteTaskToJSON(Task task)
 {
     std::filesystem::path outputFile = GetDataPath() / "tasks.json";
     std::cout << "Wrote task to JSON File: " << task.getName() << std::endl;
-
+    
     nlohmann::json jsonData = LoadJSONFile();
-    std::ofstream output(outputFile);
-    nlohmann::json jsonObj = { {"id", tasks.size()}, {"name", task.getName()}, {"description", task.getDescription()}, {"created", task.getCreated()}, {"completed", false}, {"completedAt", task.getCompletedAt()}};
+    std::ofstream output(outputFile);    
+    nlohmann::json jsonObj = { {"id", tasks.size() - 1}, {"name", task.getName()},
+                        {"description", task.getDescription()}, {"created", task.getCreated()},
+                        {"completed", false}, {"completedAt", task.getCompletedAt()}};
     jsonData["tasks"].push_back(jsonObj);
     
     if (output.is_open())
@@ -260,9 +262,13 @@ void MainFrame::MenuDeleteTodoList(wxCommandEvent&)
     wxMessageBox("Deleted a todolist");
 }
 
-void MainFrame::MenuClearTaskList(wxCommandEvent&)
+void MainFrame::MenuClearTaskList(wxCommandEvent&)  // no work
 {
     tasks.clear();
+    std::filesystem::path dataFolder = GetDataPath();
+    nlohmann::json json = LoadJSONFile();
+    json["tasks"].clear();
+    
     UpdateTaskList();
 }
 
@@ -295,7 +301,7 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
     });
 }
 
-void MainFrame::DeleteTaskButton(wxCommandEvent&)
+void MainFrame::DeleteTaskButton(wxCommandEvent&)   // needs to be updated
 {
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
@@ -314,8 +320,19 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)
     UpdateTaskList();
 }
 
-void MainFrame::FinishTaskButton(wxCommandEvent&)
+void MainFrame::FinishTaskButton(wxCommandEvent&)   // needs to be updated
 {
+    wxArrayInt indices;
+    checkboxList->GetCheckedItems(indices);
+
+    for (const auto& i : indices)
+    {
+        if (i  < tasks.size())
+        {
+            
+        }
+    }
+    
     wxMessageBox("Finished Task");
 }
 
