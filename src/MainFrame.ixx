@@ -36,6 +36,8 @@ private:
     void CreateJSONFile();
     void WriteTaskToJSON(Task task);
     void UpdateTaskList();
+    void WriteJSONToFile(nlohmann::json json);
+    
 
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
@@ -69,23 +71,11 @@ MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
     BindEventHandlers();
     if (JSONFilesExists())
     {
-        nlohmann::json jsonArray = LoadJSONFile();
-        if (jsonArray.contains("tasks") && jsonArray["tasks"].is_array())
-        {
-            for (auto json : jsonArray["tasks"]) {
-                Task task = Task(json["name"], json["description"]);
-                task.setCreated(json["created"]);
-                task.setCompleted(json["completed"]);
-                task.setCompletedAt(json["completedAt"]);
-                tasks.insert(tasks.begin(), task);
-            }
-        }
+        UpdateTaskList();
     } else
     {
         CreateJSONFile();
     }
-    
-    UpdateTaskList();
 }
 
 void MainFrame::AddControls()
@@ -215,28 +205,28 @@ void MainFrame::WriteTaskToJSON(Task task)
 
 void MainFrame::UpdateTaskList()
 {
-    int correction = 0;
-    if (tasks.size() > checkboxList->GetCount())
+    nlohmann::json jsonData = LoadJSONFile();
+    if (jsonData.contains("tasks") && jsonData["tasks"].is_array())
     {
-        correction = 1;
-    }
-    std::vector<std::string> taskNames;
-    wxArrayInt index;
-    int checkedItemSize = checkboxList->GetCheckedItems(index);
-    for (int i = 0; i < checkedItemSize && tasks.size() >= checkboxList->GetCount(); i++)
-    {
-        taskNames.emplace_back(tasks.at(index[i] + correction).getName());
-    }
-    checkboxList->Clear();
-    for (auto& task : tasks)
-    {
-        checkboxList->Insert(task.getName(), checkboxList->GetCount());
-        if (std::ranges::find(taskNames.begin(), taskNames.end(), task.getName()) != taskNames.end() && tasks.size() >=
-            checkboxList->GetCount())
-        {
-            checkboxList->Check(checkboxList->GetCount() - 1, true);
+        checkboxList->Clear();
+        tasks.clear();
+        for (auto json : jsonData["tasks"]) {
+            Task task = Task(json["name"], json["description"]);
+            task.setCreated(json["created"]);
+            task.setCompleted(json["completed"]);
+            task.setCompletedAt(json["completedAt"]);
+            tasks.insert(tasks.end(), task);
+            checkboxList->Insert(task.getName(), checkboxList->GetCount());
         }
     }
+}
+
+void MainFrame::WriteJSONToFile(nlohmann::json json)
+{
+    std::filesystem::path outputFile = GetDataPath() / "tasks.json";
+    std::ofstream output(outputFile);
+    output << json.dump(4);
+    output.close();
 }
 
 void MainFrame::OnExit(wxCommandEvent&)
@@ -267,9 +257,7 @@ void MainFrame::MenuClearTaskList(wxCommandEvent&)
     tasks.clear();
     nlohmann::json json = LoadJSONFile();
     json["tasks"].clear();
-    std::filesystem::path outputFile = GetDataPath() / "tasks.json";
-    std::ofstream output(outputFile);
-    output << json.dump(4);
+    WriteJSONToFile(json);
     UpdateTaskList();
 }
 
@@ -307,17 +295,20 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)   // needs to be updated
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
     std::ranges::reverse(indices.begin(), indices.end());
+    nlohmann::json json = LoadJSONFile();
+    
     for (const auto& i : indices)
     {
         if (i < tasks.size())
         {
-            tasks.erase(tasks.begin() + i);
+            json["tasks"].erase(i);
         }
         else
         {
             wxLogWarning("Can't delete element", i);
         }
     }
+    WriteJSONToFile(json);
     UpdateTaskList();
 }
 
