@@ -191,14 +191,15 @@ void MainFrame::CreateJSONFile()
 void MainFrame::WriteTaskToJSON(Task task)
 {
     std::filesystem::path outputFile = GetDataPath() / "tasks.json";
-    std::cout << "Wrote task to JSON File: " << task.getName() << std::endl;
-    
     nlohmann::json jsonData = LoadJSONFile();
-    std::ofstream output(outputFile);    
+    std::ofstream output(outputFile);
+    
     nlohmann::json jsonObj = { {"id", tasks.size() - 1}, {"name", task.getName()},
                         {"description", task.getDescription()}, {"created", task.getCreated()},
                         {"completed", false}, {"completedAt", task.getCompletedAt()}};
     jsonData["tasks"].push_back(jsonObj);
+    
+    WriteToLogFile("Wrote task to JSON File: " + task.getName());
     WriteJSONToFile(jsonData);
 }
 
@@ -231,8 +232,8 @@ void MainFrame::WriteJSONToFile(nlohmann::json json)
 void MainFrame::WriteToLogFile(std::string log) 
 {
     std::filesystem::path outputFile = GetDataPath() / "log.txt";
-    std::ofstream output(outputFile);
-    output << log;
+    std::ofstream output(outputFile, std::ios::app);
+    output << log + "\n";
     output.close();
 }
 
@@ -256,7 +257,7 @@ void MainFrame::MenuAddTodoList(wxCommandEvent&)
 
 void MainFrame::MenuDeleteTodoList(wxCommandEvent&)
 {
-    wxMessageBox("Deleted a todolist");
+    WriteToLogFile("Deleted a To Do List");
 }
 
 void MainFrame::MenuClearTaskList(wxCommandEvent&)
@@ -265,12 +266,13 @@ void MainFrame::MenuClearTaskList(wxCommandEvent&)
     nlohmann::json json = LoadJSONFile();
     json["tasks"].clear();
     WriteJSONToFile(json);
+    WriteToLogFile("Cleared Task List");
     UpdateTaskList();
 }
 
 void MainFrame::ShowLog(wxCommandEvent&)
 {
-    std::filesystem::path outputFile = GetDataPath() / "log.txt";
+    std::filesystem::path logFile = GetDataPath() / "log.txt";
     wxMessageBox("Show log");
 }
 
@@ -292,11 +294,13 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
         if (std::ranges::any_of(tasks, [&name, &description](auto& task) { return task.getName() == name; }))
         {
             wxMessageBox("Task already exists");
+            WriteToLogFile("Task already exists");
             AddFrame->Destroy();
             return;
         }
         Task task = Task(name.ToStdString(), description.ToStdString());
         tasks.insert(tasks.begin(), task);
+        WriteToLogFile("Task created: " + task.getName());
         WriteTaskToJSON(task);
         UpdateTaskList();
         AddFrame->Destroy();
@@ -314,11 +318,13 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)   // needs to be updated
     {
         if (i < json["tasks"].size())
         {
+            WriteToLogFile("Tasks deleted");    // update 
             json["tasks"].erase(i);
         }
         else
         {
             wxLogWarning("Can't delete element", i);
+            WriteToLogFile("Can't delete element" + i);
         }
     }
     WriteJSONToFile(json);
@@ -334,11 +340,9 @@ void MainFrame::FinishTaskButton(wxCommandEvent&)   // needs to be updated
     {
         if (i  < tasks.size())
         {
-            
+            WriteToLogFile("Finished task " + tasks[i].getName());
         }
     }
-    
-    wxMessageBox("Finished Task");
 }
 
 void MainFrame::OnListKeyDown(wxKeyEvent& evt)
