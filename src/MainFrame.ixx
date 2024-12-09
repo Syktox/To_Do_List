@@ -31,13 +31,13 @@ private:
     void AddControls();
     void BindEventHandlers();
     std::filesystem::path GetDataPath();
-    bool JSONFilesExists();
+    bool NeededFilesExist();
     nlohmann::json LoadJSONFile();
     void CreateJSONFile();
     void WriteTaskToJSON(Task task);
     void UpdateTaskList();
     void WriteJSONToFile(nlohmann::json json);
-    
+    void WriteToLogFile(std::string log);
 
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
@@ -45,6 +45,7 @@ private:
     void MenuAddTodoList(wxCommandEvent& evt);
     void MenuDeleteTodoList(wxCommandEvent& evt);
     void MenuClearTaskList(wxCommandEvent& evt);
+    void ShowLog(wxCommandEvent& evt);
 
     void CreateTaskButton(wxCommandEvent& evt);
     void DeleteTaskButton(wxCommandEvent& evt);
@@ -62,14 +63,15 @@ enum
 {
     ADD_TODOLIST_ID = 2,
     DELETE_TODOLIST_ID = 3,
-    CLEAR_TODOLIST_ID = 4
+    CLEAR_TODOLIST_ID = 4,
+    SHOW_LOG_ID = 5
 };
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
 {
     AddControls();
     BindEventHandlers();
-    if (JSONFilesExists())
+    if (NeededFilesExist())
     {
         UpdateTaskList();
     } else
@@ -94,6 +96,7 @@ void MainFrame::AddControls()
     menuFile->Append(ADD_TODOLIST_ID, "Add a new Todo List");
     menuFile->Append(DELETE_TODOLIST_ID, "Delete this Todo List");
     menuFile->Append(CLEAR_TODOLIST_ID, "Clear this Todo List");
+    menuFile->Append(SHOW_LOG_ID, "Show Log");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
     wxMenu* vieTodoListMenu = new wxMenu;
@@ -124,7 +127,9 @@ void MainFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MainFrame::MenuAddTodoList, this, ADD_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::MenuDeleteTodoList, this, DELETE_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::MenuClearTaskList, this, CLEAR_TODOLIST_ID);
+    Bind(wxEVT_MENU, &MainFrame::ShowLog, this, SHOW_LOG_ID);
     Bind(wxEVT_CHAR_HOOK, &MainFrame::OnListKeyDown, this, wxID_ANY);
+ 
  
     addButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     deleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
@@ -140,12 +145,13 @@ std::filesystem::path MainFrame::GetDataPath()
     return exe_parent_path / "data";
 }
 
-bool MainFrame::JSONFilesExists()
+bool MainFrame::NeededFilesExist()
 {
     std::filesystem::path dataPath = GetDataPath();
     if (std::filesystem::exists(dataPath) &&
         std::filesystem::exists(dataPath / "tasks.json") &&
-        std::filesystem::exists(dataPath / "finished.json"))
+        std::filesystem::exists(dataPath / "finished.json") &&
+        std::filesystem::exists(dataPath / "log.txt"))
     {
         return true;
     }
@@ -179,6 +185,7 @@ void MainFrame::CreateJSONFile()
     }
     std::ofstream jsonDataFile(dataFolder / "tasks.json");
     std::ofstream jsonFinishedDataFile(dataFolder / "finished.json");
+    std::ofstream jsonLogFile(dataFolder / "log.txt");
 }
 
 void MainFrame::WriteTaskToJSON(Task task)
@@ -192,15 +199,7 @@ void MainFrame::WriteTaskToJSON(Task task)
                         {"description", task.getDescription()}, {"created", task.getCreated()},
                         {"completed", false}, {"completedAt", task.getCompletedAt()}};
     jsonData["tasks"].push_back(jsonObj);
-    
-    if (output.is_open())
-    {
-        output << jsonData.dump(4);
-        output.close();
-    } else
-    {
-        std::cerr << "Error: " << outputFile.string() << std::endl;
-    }
+    WriteJSONToFile(jsonData);
 }
 
 void MainFrame::UpdateTaskList()
@@ -226,6 +225,14 @@ void MainFrame::WriteJSONToFile(nlohmann::json json)
     std::filesystem::path outputFile = GetDataPath() / "tasks.json";
     std::ofstream output(outputFile);
     output << json.dump(4);
+    output.close();
+}
+
+void MainFrame::WriteToLogFile(std::string log) 
+{
+    std::filesystem::path outputFile = GetDataPath() / "log.txt";
+    std::ofstream output(outputFile);
+    output << log;
     output.close();
 }
 
@@ -259,6 +266,12 @@ void MainFrame::MenuClearTaskList(wxCommandEvent&)
     json["tasks"].clear();
     WriteJSONToFile(json);
     UpdateTaskList();
+}
+
+void MainFrame::ShowLog(wxCommandEvent&)
+{
+    std::filesystem::path outputFile = GetDataPath() / "log.txt";
+    wxMessageBox("Show log");
 }
 
 void MainFrame::CreateTaskButton(wxCommandEvent&)
@@ -299,7 +312,7 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)   // needs to be updated
     
     for (const auto& i : indices)
     {
-        if (i < tasks.size())
+        if (i < json["tasks"].size())
         {
             json["tasks"].erase(i);
         }
