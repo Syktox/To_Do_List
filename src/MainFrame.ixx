@@ -41,9 +41,7 @@ private:
 
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
-
-    void MenuAddTodoList(wxCommandEvent& evt);
-    void MenuDeleteTodoList(wxCommandEvent& evt);
+    
     void MenuClearTaskList(wxCommandEvent& evt);
     void ShowLog(wxCommandEvent& evt);
 
@@ -61,10 +59,8 @@ private:
 
 enum
 {
-    ADD_TODOLIST_ID = 2,
-    DELETE_TODOLIST_ID = 3,
-    CLEAR_TODOLIST_ID = 4,
-    SHOW_LOG_ID = 5
+    CLEAR_TODOLIST_ID = 2,
+    SHOW_LOG_ID = 3
 };
 
 MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "Todo List")
@@ -93,19 +89,15 @@ void MainFrame::AddControls()
     CenterOnScreen();
 
     wxMenu* menuFile = new wxMenu;
-    menuFile->Append(ADD_TODOLIST_ID, "Add a new Todo List");
-    menuFile->Append(DELETE_TODOLIST_ID, "Delete this Todo List");
-    menuFile->Append(CLEAR_TODOLIST_ID, "Clear this Todo List");
+    menuFile->Append(CLEAR_TODOLIST_ID, "Clear Todo List");
     menuFile->Append(SHOW_LOG_ID, "Show Log");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
-    wxMenu* vieTodoListMenu = new wxMenu;
     wxMenu* menuHelp = new wxMenu;
     menuHelp->Append(wxID_ABOUT);
     wxMenuBar* menuBar = new wxMenuBar;
 
     menuBar->Append(menuFile, "&File");
-    menuBar->Append(vieTodoListMenu, "&To Do Lists");
     menuBar->Append(menuHelp, "&Help");
     MainFrame::SetMenuBar(menuBar);
 
@@ -124,8 +116,6 @@ void MainFrame::BindEventHandlers()
 {
     Bind(wxEVT_MENU, &MainFrame::OnAbout, this, wxID_ABOUT);
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
-    Bind(wxEVT_MENU, &MainFrame::MenuAddTodoList, this, ADD_TODOLIST_ID);
-    Bind(wxEVT_MENU, &MainFrame::MenuDeleteTodoList, this, DELETE_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::MenuClearTaskList, this, CLEAR_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::ShowLog, this, SHOW_LOG_ID);
     Bind(wxEVT_CHAR_HOOK, &MainFrame::OnListKeyDown, this, wxID_ANY);
@@ -249,17 +239,6 @@ void MainFrame::OnAbout(wxCommandEvent&)
                  "Author Message", wxOK | wxICON_INFORMATION);
 }
 
-void MainFrame::MenuAddTodoList(wxCommandEvent&)
-{
-    wxMessageBox("A new Todo List was created");
-    TodoList tdl = TodoList();
-}
-
-void MainFrame::MenuDeleteTodoList(wxCommandEvent&)
-{
-    WriteToLogFile("Deleted a To Do List");
-}
-
 void MainFrame::MenuClearTaskList(wxCommandEvent&)
 {
     tasks.clear();
@@ -329,7 +308,7 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)
         if (i < json["tasks"].size())
         {
             nlohmann::json j = json["tasks"][i];
-            WriteToLogFile("Tasks deleted: " + j.dump(4));
+            WriteToLogFile("Tasks deleted: " + j["name"].get<std::string>());
             json["tasks"].erase(i);
         }
         else
@@ -351,6 +330,7 @@ void MainFrame::FinishTaskButton(wxCommandEvent&)   // needs to be updated
     {
         if (i  < tasks.size())
         {
+            wxMessageBox("Finished task " + tasks[i].getName());
             WriteToLogFile("Finished task " + tasks[i].getName());
         }
     }
@@ -376,7 +356,7 @@ void MainFrame::OnListKeyDown(wxKeyEvent& evt)
             OnEnterKey();
             break;
         default:
-            evt.Skip(); // dont know the effects
+            evt.Skip();
             break;
         }
     }
