@@ -156,11 +156,15 @@ nlohmann::json MainFrame::LoadJSONFile(std::string filePath)
     {
         return nlohmann::json();
     }
-
+    
     try
     {
         return nlohmann::json::parse(inputFile);
     } catch (const nlohmann::json::parse_error& e)
+    {
+        std::cout << "Invalid JSON: " << e.what() << std::endl;
+        return nlohmann::json();
+    } catch (const std::exception& e)
     {
         std::cout << "Invalid JSON: " << e.what() << std::endl;
         return nlohmann::json();
@@ -330,7 +334,7 @@ void MainFrame::FinishTaskButton(wxCommandEvent&)   // needs to be updated cant 
 {
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
-
+    std::ranges::reverse(indices.begin(), indices.end());
     nlohmann::json jsonFile = LoadJSONFile("tasks.json");
     nlohmann::json jsonFinished = LoadJSONFile("finished.json");
     
@@ -338,7 +342,10 @@ void MainFrame::FinishTaskButton(wxCommandEvent&)   // needs to be updated cant 
     {
         if (i  < tasks.size() && jsonFile.contains("tasks") && jsonFile["tasks"][i].contains("name"))
         {
-            jsonFinished["tasks"].push_back(jsonFile["tasks"][i]);
+            nlohmann::json temp = jsonFile["tasks"][i];
+            temp["completed"] = true;
+            temp["completedAt"] = time(nullptr);
+            jsonFinished["tasks"].push_back(temp);
             jsonFile["tasks"].erase(i);
             WriteToLogFile("Finished task " + tasks[i].getName());
         }
