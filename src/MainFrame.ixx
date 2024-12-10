@@ -273,7 +273,17 @@ void MainFrame::MenuClearTaskList(wxCommandEvent&)
 void MainFrame::ShowLog(wxCommandEvent&)
 {
     std::filesystem::path logFile = GetDataPath() / "log.txt";
-    wxMessageBox("Show log");
+    std::ifstream input(logFile);
+    if (input.is_open())
+    {
+        while (!input.eof())
+        {
+            std::string line;
+            std::getline(input, line);
+            std::cout << line << std::endl;
+        }
+        input.close();
+    }
 }
 
 void MainFrame::CreateTaskButton(wxCommandEvent&)
@@ -307,7 +317,7 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
     });
 }
 
-void MainFrame::DeleteTaskButton(wxCommandEvent&)   // needs to be updated
+void MainFrame::DeleteTaskButton(wxCommandEvent&)
 {
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
@@ -318,7 +328,8 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)   // needs to be updated
     {
         if (i < json["tasks"].size())
         {
-            WriteToLogFile("Tasks deleted");    // update 
+            nlohmann::json j = json["tasks"][i];
+            WriteToLogFile("Tasks deleted: " + j.dump(4));
             json["tasks"].erase(i);
         }
         else
