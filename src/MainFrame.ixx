@@ -32,11 +32,12 @@ private:
     void BindEventHandlers();
     std::filesystem::path GetDataPath();
     bool NeededFilesExist();
-    nlohmann::json LoadJSONFile();
+    nlohmann::json LoadJSONFile(std::string filePath);
     void CreateJSONFile();
     void WriteTaskToJSON(Task task);
     void UpdateTaskList();
     void WriteJSONToFile(nlohmann::json json);
+    void WriteJSONToFinishedFile(nlohmann::json json);
     void WriteToLogFile(std::string log);
 
     void OnExit(wxCommandEvent& evt);
@@ -119,8 +120,7 @@ void MainFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MainFrame::MenuClearTaskList, this, CLEAR_TODOLIST_ID);
     Bind(wxEVT_MENU, &MainFrame::ShowLog, this, SHOW_LOG_ID);
     Bind(wxEVT_CHAR_HOOK, &MainFrame::OnListKeyDown, this, wxID_ANY);
- 
- 
+    
     addButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
     deleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
     finishButton->Bind(wxEVT_BUTTON, &MainFrame::FinishTaskButton, this);
@@ -148,12 +148,11 @@ bool MainFrame::NeededFilesExist()
     return false;
 }
 
-nlohmann::json MainFrame::LoadJSONFile() // no work
+nlohmann::json MainFrame::LoadJSONFile(std::string filePath) // no work
 {
     std::filesystem::path dataPath = GetDataPath();
-    std::ifstream inputFile{dataPath / "tasks.json"};
-    std::ifstream jsonFinishedDataFile{dataPath / "finished.json"};
-
+    std::ifstream inputFile{dataPath / filePath};
+    
     if (inputFile.peek() == std::ifstream::traits_type::eof())
     {
         return nlohmann::json();
@@ -181,7 +180,7 @@ void MainFrame::CreateJSONFile()
 void MainFrame::WriteTaskToJSON(Task task)
 {
     std::filesystem::path outputFile = GetDataPath() / "tasks.json";
-    nlohmann::json jsonData = LoadJSONFile();
+    nlohmann::json jsonData = LoadJSONFile("tasks.json");
     std::ofstream output(outputFile);
     
     nlohmann::json jsonObj = { {"id", tasks.size() - 1}, {"name", task.getName()},
@@ -195,7 +194,7 @@ void MainFrame::WriteTaskToJSON(Task task)
 
 void MainFrame::UpdateTaskList()
 {
-    nlohmann::json jsonData = LoadJSONFile();
+    nlohmann::json jsonData = LoadJSONFile("tasks.json");
     if (jsonData.contains("tasks") && jsonData["tasks"].is_array())
     {
         checkboxList->Clear();
@@ -214,6 +213,14 @@ void MainFrame::UpdateTaskList()
 void MainFrame::WriteJSONToFile(nlohmann::json json)
 {
     std::filesystem::path outputFile = GetDataPath() / "tasks.json";
+    std::ofstream output(outputFile);
+    output << json.dump(4);
+    output.close();
+}
+
+void MainFrame::WriteJSONToFinishedFile(nlohmann::json json)
+{
+    std::filesystem::path outputFile = GetDataPath() / "finished.json";
     std::ofstream output(outputFile);
     output << json.dump(4);
     output.close();
@@ -242,7 +249,7 @@ void MainFrame::OnAbout(wxCommandEvent&)
 void MainFrame::MenuClearTaskList(wxCommandEvent&)
 {
     tasks.clear();
-    nlohmann::json json = LoadJSONFile();
+    nlohmann::json json = LoadJSONFile("tasks.json");
     json["tasks"].clear();
     WriteJSONToFile(json);
     WriteToLogFile("Cleared Task List");
@@ -301,7 +308,7 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
     std::ranges::reverse(indices.begin(), indices.end());
-    nlohmann::json json = LoadJSONFile();
+    nlohmann::json json = LoadJSONFile("tasks.json");
     
     for (const auto& i : indices)
     {
@@ -326,14 +333,24 @@ void MainFrame::FinishTaskButton(wxCommandEvent&)   // needs to be updated
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
 
+    nlohmann::json jsonFile = LoadJSONFile("tasks.json");
+    nlohmann::json jsonFinished = LoadJSONFile("finished.json");
+    
     for (const auto& i : indices)
     {
         if (i  < tasks.size())
         {
+            jsonFinished["tasks"].push_back(jsonFile["tasks"].at(i)); // no work
+            jsonFile["tasks"].erase(i);
+            std::cout << jsonFinished.dump(4); 
             wxMessageBox("Finished task " + tasks[i].getName());
             WriteToLogFile("Finished task " + tasks[i].getName());
         }
     }
+
+    WriteJSONToFile(jsonFile);
+    WriteJSONToFinishedFile(jsonFinished);
+    UpdateTaskList();
 }
 
 void MainFrame::OnListKeyDown(wxKeyEvent& evt)
