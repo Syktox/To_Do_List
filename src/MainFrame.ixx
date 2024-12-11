@@ -396,20 +396,41 @@ void MainFrame::OnDeleteKey()
 
 void MainFrame::OnArrowUPKey()
 {
-    wxMessageBox("UP Key pressed");
-    int index = checkboxList->GetSelection();
-    if (wxNOT_FOUND == index)
+    nlohmann::json jsonFile = LoadJSONFile("tasks.json");
+    wxArrayInt indices;
+    checkboxList->GetCheckedItems(indices);
+
+    for (auto i : indices)
     {
-        wxLogWarning("No element selected to move");
-        return;
+        if (i < tasks.size() && jsonFile["tasks"][i].contains("name") && i > 0)
+        {
+            nlohmann::json temp = jsonFile["tasks"][i];
+            jsonFile["tasks"].erase(i);
+            jsonFile["tasks"].insert(jsonFile["tasks"].begin() + i - 1, temp);
+        }
     }
 
+    WriteJSONToFile(jsonFile, "tasks.json");
     UpdateTaskList();
 }
 
 void MainFrame::OnArrowDOWNKey()
 {
-    wxMessageBox("DOWN Key pressed");
+    nlohmann::json jsonFile = LoadJSONFile("tasks.json");
+    wxArrayInt indices;
+    checkboxList->GetCheckedItems(indices);
+
+    for (auto i : indices)
+    {
+        if (i < tasks.size() - 1 && jsonFile["tasks"][i].contains("name") && i > 0)
+        {
+            nlohmann::json temp = jsonFile["tasks"][i];
+            jsonFile["tasks"].erase(i);
+            jsonFile["tasks"].insert(jsonFile["tasks"].begin() + i + 1, temp);
+        }
+    }
+
+    WriteJSONToFile(jsonFile, "tasks.json");
     UpdateTaskList();
 }
 
