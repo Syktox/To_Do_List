@@ -204,7 +204,7 @@ void MainFrame::WriteTaskToJSON(Task task)
 
 void MainFrame::UpdateTaskList()
 {
-    nlohmann::json jsonData = LoadJSONFile("tasks.json");
+    nlohmann::json jsonData = LoadJSONFile("tasks.json");    
     if (jsonData.contains("tasks") && jsonData["tasks"].is_array())
     {
         checkboxList->Clear();
@@ -378,14 +378,16 @@ void MainFrame::OnListKeyDown(wxKeyEvent& evt)
             evt.Skip();
             break;
         }
-    }
-    switch (evt.GetKeyCode())
+    } else
     {
-    case 67:
-        OnCKey();
-        break;
-    default:
-        break;
+        switch (evt.GetKeyCode())
+        {
+        case 67:
+            OnCKey();
+            break;
+        default:
+            break;
+        }
     }
 }
 
