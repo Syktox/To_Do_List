@@ -14,6 +14,7 @@ import std;
 import TodoList;
 import Task;
 import CreateTaskWindow;
+import CreateLogWindow;
 
 export class MainFrame : public wxFrame
 {
@@ -286,20 +287,11 @@ void MainFrame::MenuClearTaskList(wxCommandEvent&)
     UpdateTaskList();
 }
 
-void MainFrame::ShowLog(wxCommandEvent&)    // update
+void MainFrame::ShowLog(wxCommandEvent&)
 {
-    std::filesystem::path logFile = GetDataPath() / "log.txt";
-    std::ifstream input(logFile);
-    if (input.is_open())
-    {
-        while (!input.eof())
-        {
-            std::string line;
-            std::getline(input, line);
-            std::cout << line << std::endl;
-        }
-        input.close();
-    }
+    CreateLogWindow* log_window = new CreateLogWindow();
+    log_window->Center();
+    log_window->Show(true);
 }
 
 void MainFrame::CreateTask(wxCommandEvent&)
