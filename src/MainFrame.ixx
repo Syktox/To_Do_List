@@ -1,5 +1,6 @@
 module;
 
+#include <complex.h>
 #include <wx/wx.h>
 #include <nlohmann/json.hpp>
 #include <Windows.h>
@@ -36,6 +37,7 @@ private:
     void CreateJSONFile();
     void WriteTaskToJSON(Task task);
     void UpdateTaskList();
+    void UpdateTaskList(std::vector<unsigned int> checkedItems);
     void WriteJSONToFile(nlohmann::json json, std::string path);
     void WriteToLogFile(std::string log);
 
@@ -45,9 +47,9 @@ private:
     void MenuClearTaskList(wxCommandEvent& evt);
     void ShowLog(wxCommandEvent& evt);
 
-    void CreateTaskButton(wxCommandEvent& evt);
-    void DeleteTaskButton(wxCommandEvent& evt);
-    void FinishTaskButton(wxCommandEvent& evt);
+    void CreateTask(wxCommandEvent& evt);
+    void DeleteTask(wxCommandEvent& evt);
+    void FinishTask(wxCommandEvent& evt);
 
     void OnListKeyDown(wxKeyEvent& evt);
     void OnArrowUPKey();
@@ -120,9 +122,9 @@ void MainFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MainFrame::ShowLog, this, SHOW_LOG_ID);
     Bind(wxEVT_CHAR_HOOK, &MainFrame::OnListKeyDown, this, wxID_ANY);
     
-    addButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTaskButton, this);
-    deleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTaskButton, this);
-    finishButton->Bind(wxEVT_BUTTON, &MainFrame::FinishTaskButton, this);
+    addButton->Bind(wxEVT_BUTTON, &MainFrame::CreateTask, this);
+    deleteButton->Bind(wxEVT_BUTTON, &MainFrame::DeleteTask, this);
+    finishButton->Bind(wxEVT_BUTTON, &MainFrame::FinishTask, this);
     checkboxList->Bind(wxEVT_KEY_DOWN, &MainFrame::OnListKeyDown, this);
 }
 
@@ -204,7 +206,8 @@ void MainFrame::WriteTaskToJSON(Task task)
 
 void MainFrame::UpdateTaskList()
 {
-    nlohmann::json jsonData = LoadJSONFile("tasks.json");    
+    nlohmann::json jsonData = LoadJSONFile("tasks.json");
+    
     if (jsonData.contains("tasks") && jsonData["tasks"].is_array())
     {
         checkboxList->Clear();
@@ -216,6 +219,30 @@ void MainFrame::UpdateTaskList()
             task.setCompletedAt(json["completedAt"]);
             tasks.insert(tasks.end(), task);
             checkboxList->Insert(task.getName(), checkboxList->GetCount());
+        }
+    }
+}
+
+void MainFrame::UpdateTaskList(std::vector<unsigned int> checkedItems)
+{
+    nlohmann::json jsonData = LoadJSONFile("tasks.json");
+    
+    if (jsonData.contains("tasks") && jsonData["tasks"].is_array())
+    {
+        checkboxList->Clear();
+        tasks.clear();
+        for (auto json : jsonData["tasks"]) {
+            Task task = Task(json["name"], json["description"]);
+            task.setCreated(json["created"]);
+            task.setCompleted(json["completed"]);
+            task.setCompletedAt(json["completedAt"]);
+            tasks.insert(tasks.end(), task);
+            checkboxList->Insert(task.getName(), checkboxList->GetCount());
+            if (std::ranges::find(checkedItems.begin(), checkedItems.end(),
+                checkboxList->GetCount() - 1) != checkedItems.end())
+            {
+                checkboxList->Check(checkboxList->GetCount() - 1, true);
+            }
         }
     }
 }
@@ -259,7 +286,7 @@ void MainFrame::MenuClearTaskList(wxCommandEvent&)
     UpdateTaskList();
 }
 
-void MainFrame::ShowLog(wxCommandEvent&)
+void MainFrame::ShowLog(wxCommandEvent&)    // update
 {
     std::filesystem::path logFile = GetDataPath() / "log.txt";
     std::ifstream input(logFile);
@@ -275,7 +302,7 @@ void MainFrame::ShowLog(wxCommandEvent&)
     }
 }
 
-void MainFrame::CreateTaskButton(wxCommandEvent&)
+void MainFrame::CreateTask(wxCommandEvent&)
 {
     CreateTaskWindow* AddFrame = new CreateTaskWindow();
     AddFrame->CenterOnParent();
@@ -297,16 +324,23 @@ void MainFrame::CreateTaskButton(wxCommandEvent&)
             AddFrame->Destroy();
             return;
         }
+        std::vector<unsigned int> checkedItems;
+        wxArrayInt indices;
+        checkboxList->GetCheckedItems(indices);
+        for (auto item : indices)
+        {
+            checkedItems.push_back(item);
+        }
         Task task = Task(name.ToStdString(), description.ToStdString());
         tasks.insert(tasks.begin(), task);
         WriteToLogFile("Task created: " + task.getName());
         WriteTaskToJSON(task);
-        UpdateTaskList();
+        UpdateTaskList(checkedItems);
         AddFrame->Destroy();
     });
 }
 
-void MainFrame::DeleteTaskButton(wxCommandEvent&)
+void MainFrame::DeleteTask(wxCommandEvent&)
 {
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
@@ -330,7 +364,7 @@ void MainFrame::DeleteTaskButton(wxCommandEvent&)
     UpdateTaskList();
 }
 
-void MainFrame::FinishTaskButton(wxCommandEvent&)   // needs to be updated cant delete last????
+void MainFrame::FinishTask(wxCommandEvent&)
 {
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
@@ -393,7 +427,7 @@ void MainFrame::OnListKeyDown(wxKeyEvent& evt)
 
 void MainFrame::OnDeleteKey()
 {
-    DeleteTaskButton(dummyEvent);
+    DeleteTask(dummyEvent);
 }
 
 void MainFrame::OnArrowUPKey()
@@ -401,6 +435,7 @@ void MainFrame::OnArrowUPKey()
     nlohmann::json jsonFile = LoadJSONFile("tasks.json");
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
+    std::vector<unsigned int> checkedItems;
 
     for (auto i : indices)
     {
@@ -410,10 +445,11 @@ void MainFrame::OnArrowUPKey()
             jsonFile["tasks"].erase(i);
             jsonFile["tasks"].insert(jsonFile["tasks"].begin() + i - 1, temp);
         }
+        checkedItems.push_back(i);
     }
 
     WriteJSONToFile(jsonFile, "tasks.json");
-    UpdateTaskList();
+    UpdateTaskList(checkedItems);
 }
 
 void MainFrame::OnArrowDOWNKey()
@@ -421,6 +457,7 @@ void MainFrame::OnArrowDOWNKey()
     nlohmann::json jsonFile = LoadJSONFile("tasks.json");
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
+    std::vector<unsigned int> checkedItems;
 
     for (auto i : indices)
     {
@@ -430,19 +467,23 @@ void MainFrame::OnArrowDOWNKey()
             jsonFile["tasks"].erase(i);
             jsonFile["tasks"].insert(jsonFile["tasks"].begin() + i + 1, temp);
         }
+        checkedItems.push_back(i);
     }
-
+    for (auto i : checkedItems)
+    {
+        std::cout << i << std::endl;
+    }
     WriteJSONToFile(jsonFile, "tasks.json");
-    UpdateTaskList();
+    UpdateTaskList(checkedItems);
 }
 
 void MainFrame::OnEnterKey()
 {
-    FinishTaskButton(dummyEvent);
+    FinishTask(dummyEvent);
     UpdateTaskList();
 }
 
 void MainFrame::OnCKey()
 {
-    CreateTaskButton(dummyEvent);
+    CreateTask(dummyEvent);
 }
