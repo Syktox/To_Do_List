@@ -408,6 +408,9 @@ void MainFrame::OnListKeyDown(wxKeyEvent& evt)
         case WXK_RETURN:
             OnEnterKey();
             break;
+        case 67:    // C
+            OnCKey();
+            break;
         default:
             evt.Skip();
             break;
@@ -436,16 +439,24 @@ void MainFrame::OnArrowUPKey()
     wxArrayInt indices;
     checkboxList->GetCheckedItems(indices);
     std::vector<unsigned int> checkedItems;
+    
+    for (int idx = 0; idx < indices.GetCount(); ++idx) {
+        int i = indices[idx];
 
-    for (auto i : indices)
-    {
-        if (i < tasks.size() && jsonFile["tasks"][i].contains("name") && i > 0)
-        {
+        if (i < tasks.size() && i > 0 && jsonFile["tasks"][i].contains("name") &&
+            std::ranges::find(indices.begin(), indices.end(), i - 1) == indices.end()) {
             nlohmann::json temp = jsonFile["tasks"][i];
             jsonFile["tasks"].erase(i);
-            jsonFile["tasks"].insert(jsonFile["tasks"].begin() + i - 1, temp);
-        }
-        checkedItems.push_back(i);
+            jsonFile["tasks"].insert(jsonFile["tasks"].begin() + (i - 1), temp);
+            indices.RemoveAt(idx);
+            --idx;
+            checkedItems.push_back(i - 1);
+            } else {
+                if (i <= 0) 
+                    checkedItems.push_back(0);
+                else 
+                    checkedItems.push_back(i);
+            }
     }
 
     WriteJSONToFile(jsonFile, "tasks.json");
@@ -459,20 +470,24 @@ void MainFrame::OnArrowDOWNKey()
     checkboxList->GetCheckedItems(indices);
     std::vector<unsigned int> checkedItems;
 
-    for (auto i : indices)
-    {
-        if (i < tasks.size() - 1 && jsonFile["tasks"][i].contains("name") && i > 0)
-        {
+    for (int idx = indices.GetCount() - 1; idx >= 0; --idx) {
+        int i = indices[idx];
+
+        if (i < tasks.size() - 1 && jsonFile["tasks"][i].contains("name") &&
+            std::ranges::find(indices.begin(), indices.end(), i + 1) == indices.end()) {
             nlohmann::json temp = jsonFile["tasks"][i];
             jsonFile["tasks"].erase(i);
-            jsonFile["tasks"].insert(jsonFile["tasks"].begin() + i + 1, temp);
-        }
-        checkedItems.push_back(i);
+            jsonFile["tasks"].insert(jsonFile["tasks"].begin() + (i + 1), temp);
+            indices.RemoveAt(idx);
+            checkedItems.push_back(i + 1);
+            } else {
+                if (i >= tasks.size() - 1) 
+                    checkedItems.push_back(tasks.size() - 1);
+                else 
+                    checkedItems.push_back(i);
+            }
     }
-    for (auto i : checkedItems)
-    {
-        std::cout << i << std::endl;
-    }
+    
     WriteJSONToFile(jsonFile, "tasks.json");
     UpdateTaskList(checkedItems);
 }
